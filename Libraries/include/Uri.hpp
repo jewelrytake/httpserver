@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 namespace Uri
 {
@@ -24,9 +25,15 @@ namespace Uri
 		bool ParseFromString(const std::string& uriString);
 		std::string GetHost() const;
 		std::string GetScheme() const;
+		std::string GetFragment() const;
+		std::string GetQuery() const;
+		bool HasPort() const;
+		uint16_t GetPort() const;
+		bool IsRelativeReference() const;
+		bool ContainsRelativePath() const;
 		std::vector < std::string > GetPath() const;
 	private:
 		struct Impl;
-		std::unique_ptr< Impl > impl_;
+		std::unique_ptr< Impl > m_impl;
 	};
 }
