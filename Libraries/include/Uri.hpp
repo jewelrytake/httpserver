@@ -27,6 +27,7 @@ namespace Uri
 		std::string GetScheme() const;
 		std::string GetFragment() const;
 		std::string GetQuery() const;
+		std::string GetUserInfo() const;
 		bool HasPort() const;
 		uint16_t GetPort() const;
 		bool IsRelativeReference() const;

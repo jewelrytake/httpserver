@@ -2,11 +2,33 @@
 #include <string>
 #include <limits.h>
 
+namespace
+{
+	bool ParseUint16(const std::string& numberString, uint16_t& number)
+	{
+		uint32_t tmpPort = 0;
+		for (auto c : numberString)
+		{
+			if (c < '0' || c > '9')
+				return false;
+			tmpPort *= 10;
+			tmpPort += (uint16_t)(c - '0');
+			if ((tmpPort & ~((1 << 16) - 1)) != 0)
+			{
+				return false;
+			}
+		}
+		number = (uint16_t)tmpPort;
+		return true;
+	}
+}
+
 namespace Uri
 {
 	struct Uri::Impl
 	{
 		std::string m_scheme;
+		std::string m_userInfo;
 		std::string m_host;
 		std::string m_fragment;
 		std::string m_query;
@@ -33,48 +55,61 @@ namespace Uri
 			m_impl->m_scheme = uriString.substr(0, schemeEnd);
 			rest = uriString.substr(schemeEnd + 1);
 		}
+
+
 		m_impl->m_hasPort = false;
 		const size_t pathEnd = rest.find_first_of("?#");
-		std::string hostAndPathString = rest.substr(0, pathEnd);
-		const std::string queryAndOrFragment = rest.substr(hostAndPathString.length());
-		if (hostAndPathString.substr(0, 2) == "//")
+		std::string authorityAndPathString = rest.substr(0, pathEnd);
+		const std::string queryAndOrFragment = rest.substr(authorityAndPathString.length());
+		
+		std::string hostPortAndPathString;
+		if (authorityAndPathString.substr(0, 2) == "//")
 		{
-			size_t authorityEnd = hostAndPathString.find('/', 2);
+			authorityAndPathString = authorityAndPathString.substr(2);
+			size_t authorityEnd = authorityAndPathString.find('/');
 			if (authorityEnd == std::string::npos)
 			{
-				authorityEnd = hostAndPathString.length();
+				authorityEnd = authorityAndPathString.length();
 			}
-			const size_t portDelimiter = hostAndPathString.find(':');
-			if (portDelimiter == std::string::npos)
+			const size_t userInfoDelimiter = authorityAndPathString.find('@');
+			if (userInfoDelimiter == std::string::npos)
 			{
-				m_impl->m_host = hostAndPathString.substr(2, authorityEnd - 2);
+				m_impl->m_userInfo.clear();
+				hostPortAndPathString = authorityAndPathString;
 			}
 			else
 			{
-				m_impl->m_host = hostAndPathString.substr(2, portDelimiter - 2);
-				uint32_t tmpPort = 0;
-				for (auto c : hostAndPathString.substr(portDelimiter + 1, authorityEnd - portDelimiter - 1))
-				{
-					if (c < '0' || c > '9')
-						return false;
-					tmpPort *= 10;
-					tmpPort += (uint16_t)(c - '0');
+				m_impl->m_userInfo = authorityAndPathString.substr(0, userInfoDelimiter);
+				hostPortAndPathString = authorityAndPathString.substr(userInfoDelimiter + 1);
+			}
 
-					if ((tmpPort & ~((1 << 16) - 1)) != 0)
-						return false;
+			const size_t portDelimiter = hostPortAndPathString.find(':');
+			if (portDelimiter == std::string::npos)
+			{
+				m_impl->m_host = hostPortAndPathString.substr(0, authorityEnd);
+			}
+			else
+			{
+				m_impl->m_host = hostPortAndPathString.substr(0, portDelimiter);
+				if (
+					!ParseUint16(hostPortAndPathString.substr(portDelimiter + 1, authorityEnd - portDelimiter - 1),
+						m_impl->m_port)
+					)
+				{
+					return false;
 				}
-				m_impl->m_port = (uint16_t)tmpPort;
 				m_impl->m_hasPort = true;
 			}
-			hostAndPathString = hostAndPathString.substr(authorityEnd);
+			hostPortAndPathString = authorityAndPathString.substr(authorityEnd);
 		}
 		else
 		{
 			m_impl->m_host.clear();
+			hostPortAndPathString = authorityAndPathString;
 		}
-		std::string pathString = hostAndPathString;
+		std::string pathString = authorityAndPathString;
+		
 		m_impl->m_path.clear();
-
 		if (pathString == "/")
 		{
 			m_impl->m_path.emplace_back("");
@@ -134,6 +169,10 @@ namespace Uri
 	std::string Uri::GetQuery() const
 	{
 		return m_impl->m_query;
+	}
+	std::string Uri::GetUserInfo() const
+	{
+		return m_impl->m_userInfo;
 	}
 	bool Uri::HasPort() const
 	{

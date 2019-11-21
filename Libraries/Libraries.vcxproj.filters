@@ -18,9 +18,15 @@
     <ClInclude Include="include\Uri.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\URL.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Uri.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\URL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

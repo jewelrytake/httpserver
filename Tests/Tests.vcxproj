@@ -161,6 +161,7 @@
     <ClCompile Include="..\..\googletest-master\googletest\src\gtest-all.cc" />
     <ClCompile Include="..\..\googletest-master\googletest\src\gtest_main.cc" />
     <ClCompile Include="uri\UriTest.cpp" />
+    <ClCompile Include="uri\URLTests.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
