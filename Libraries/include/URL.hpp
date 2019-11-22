@@ -20,6 +20,7 @@ namespace URL
 
 		bool ParseURL(const std::string& url);
 		std::string GetScheme() const;
+		std::string GetUserInfo() const;
 		std::string GetDomain() const;
 		uint16_t GetPort() const;
 		std::vector< std::string > GetPath() const;

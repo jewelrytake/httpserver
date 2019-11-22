@@ -2,11 +2,11 @@
 #include <limits.h>
 #include <string_view>
 
-
 namespace
 {
-
-	bool ParseRestString(std::string_view& startString, size_t removeIndex, std::shared_ptr< URL::URL::URLNode> node, const char* delims = "/?#:");
+	void ProcessSpecialCase(std::string_view& str, std::string& out, uint8_t& flag, const char* delims = "/?#:");
+	void ProcessSpecialCase(std::string_view& str, std::vector< std::string >& out, uint8_t& flag, const char* delims = "/?#:");
+	void ParseRestString(std::string_view& startString, size_t removeIndex, std::shared_ptr< URL::URL::URLNode> node, uint8_t& mainFlag, const char* delims = "/?#:");
 	bool ParseUint16(std::string_view& str, uint16_t& portNumber, size_t& count);
 }
 
@@ -17,6 +17,7 @@ namespace URL
 	struct URL::URLNode
 	{
 		std::string m_scheme;
+		std::string m_userInfo;
 		std::string m_domain;
 		uint16_t m_port = 0;
 		std::vector< std::string > m_path;
@@ -29,6 +30,11 @@ namespace URL
 	std::string URL::GetScheme() const
 	{
 		return m_node->m_scheme;
+	}
+
+	std::string URL::GetUserInfo() const
+	{
+		return m_node->m_userInfo;
 	}
 
 	std::string URL::GetDomain() const
@@ -60,166 +66,211 @@ namespace URL
 	{
 		m_node->m_port = 0;
 		std::string_view startString = url;
+
 		size_t schemeDelimiter = startString.find(':');
-		if (startString[schemeDelimiter + 1] == '/' && startString[schemeDelimiter + 2] == '/')
+		uint8_t mainFlag = 0;
+		std::string_view schemeOrDomain = startString.substr(0, schemeDelimiter);
+
+		size_t notSchemeDelimiter = schemeOrDomain.find_first_of("./@");
+		if (notSchemeDelimiter == std::string::npos)
 		{
-			m_node->m_scheme = startString.substr(0, schemeDelimiter);
-			startString.remove_prefix(schemeDelimiter + 3);
-			size_t portOrPathDelim = startString.find_first_of(":/");
-			if (portOrPathDelim == std::string::npos)
+			m_node->m_scheme = schemeOrDomain;
+			startString.remove_prefix(schemeDelimiter);
+
+			if (auto authority = startString.substr(0, 3); authority == "://")
 			{
-				m_node->m_domain = startString;
-			}
-			else
-			{
-				m_node->m_domain = startString.substr(0, portOrPathDelim);
-				if (startString[portOrPathDelim] == ':')
+				startString.remove_prefix(authority.length());
+				if (size_t userDelim = startString.find('@'); userDelim != std::string::npos)
 				{
-					size_t portLength = 0;
-					ParseUint16(startString, m_node->m_port, portLength);
-					ParseRestString(startString, portOrPathDelim + portLength + 1, m_node);
+					m_node->m_userInfo = startString.substr(0, userDelim);
+					ParseRestString(startString, userDelim, m_node, mainFlag);
 				}
-				else
+			}
+			else if (startString[0] == ':')
+			{
+				startString.remove_prefix(1);
+				if (size_t userDelim = startString.find('@'); userDelim != std::string::npos)
 				{
-					ParseRestString(startString, portOrPathDelim, m_node);
+					m_node->m_userInfo = startString.substr(0, userDelim);
+					std::string tmp = startString.data();
+					tmp[userDelim] = ':';
+					std::string_view rest = tmp;
+					ParseRestString(rest, userDelim, m_node, mainFlag);
+					if (mainFlag == 1)
+						return true;
 				}
 			}
 		}
-		else
+		else if (notSchemeDelimiter != std::string::npos)
 		{
-			// example - "urn:example:animal:ferret:nose"
-			std::string_view schemeString = startString.substr(0, schemeDelimiter);
-			size_t domainPos = schemeString.find_first_of("/.");
-			if (domainPos == std::string::npos)
-			{
-				m_node->m_scheme = schemeString;
-				m_node->m_domain.clear();
-				ParseRestString(startString, schemeDelimiter, m_node);
-			}
-			else
-			{
-				m_node->m_scheme.clear();
-				size_t domainEnd = startString.find_first_of(":/");
-				if (domainEnd == std::string::npos)
-				{
-					m_node->m_domain = startString;
-				}
-				else
-				{
-					m_node->m_domain = startString.substr(0, domainEnd);
-					if (startString[domainEnd] == ':')
-					{
-						size_t portLength = 0;
-						ParseUint16(startString, m_node->m_port, portLength);
-						ParseRestString(startString, domainEnd + portLength + 1, m_node);
-					}
-					else
-					{
-						ParseRestString(startString, domainEnd, m_node);
-					}
-				}
-			}
+			m_node->m_scheme.clear();
+			size_t domainDelim = schemeOrDomain.find_first_of(":/?");
+			m_node->m_domain = schemeOrDomain.substr(0, domainDelim);
+			schemeOrDomain.remove_prefix(domainDelim);
 		}
+
+
+
+		//-----------------------------------------------
+		//if (startString[schemeDelimiter + 1] == '/' && startString[schemeDelimiter + 2] == '/')
+		//{
+		//	m_node->m_scheme = startString.substr(0, schemeDelimiter);
+		//	startString.remove_prefix(schemeDelimiter + 3);
+  //    		size_t delimPos = startString.find_first_of(":/?=#@");
+		//	if (delimPos == std::string::npos)
+		//	{
+		//		m_node->m_domain = startString;
+		//	}
+		//	else
+		//	{
+		//		if (startString[delimPos] == ':')
+		//		{
+		//			size_t portLength = 0;
+		//			ParseUint16(startString, m_node->m_port, portLength);
+		//			ParseRestString(startString, delimPos + portLength + 1, m_node, mainFlag);
+		//			if (mainFlag == 1)
+		//				return true;
+		//		}
+		//		else if (startString[delimPos] == '@')
+		//		{
+		//			m_node->m_userInfo = startString.substr(0, delimPos);
+		//			m_node->m_domain = startString.substr(0, delimPos);
+		//			ParseRestString(startString, delimPos + 1, m_node, mainFlag);
+		//			if (mainFlag == 1)
+		//				return true;
+		//		}
+		//		else
+		//		{
+		//			m_node->m_domain = startString.substr(0, delimPos);
+		//			ParseRestString(startString, delimPos, m_node, mainFlag);
+		//			if (mainFlag == 1)
+		//				return true;
+		//		}
+		//	}
+		//}
+		//else
+		//{
+		//	// example - "urn:example:animal:ferret:nose"
+		//	std::string_view schemeString = startString.substr(0, schemeDelimiter);
+		//	if (schemeString.find_first_of("/.") == std::string::npos)
+		//	{
+		//		m_node->m_scheme = schemeString;
+		//		m_node->m_domain.clear();
+		//		ParseRestString(startString, schemeDelimiter, m_node, mainFlag);
+		//		if (mainFlag == 1)
+		//			return true;
+		//	}
+		//	else
+		//	{
+		//		m_node->m_scheme.clear();
+		//		size_t domainEnd = startString.find_first_of(":/");
+		//		if (domainEnd == std::string::npos)
+		//		{
+		//			m_node->m_domain = startString;
+		//		}
+		//		else
+		//		{
+		//			m_node->m_domain = startString.substr(0, domainEnd);
+		//			if (startString[domainEnd] == ':')
+		//			{
+		//				size_t portLength = 0;
+		//				ParseUint16(startString, m_node->m_port, portLength);
+		//				ParseRestString(startString, domainEnd + portLength + 1, m_node, mainFlag);
+		//				if (mainFlag == 1)
+		//					return true;
+		//			}
+		//			else
+		//			{
+		//				ParseRestString(startString, domainEnd, m_node, mainFlag);
+		//				if (mainFlag == 1)
+		//					return true;
+		//			}
+		//		}
+		//	}
+		//}
 		return true;
 	}
 }
 
 namespace
 {
-	bool ParseRestString(std::string_view& startString, size_t removeIndex, std::shared_ptr< URL::URL::URLNode> node, const char* delims)
+	void ParseRestString(std::string_view& startString, size_t removeIndex, std::shared_ptr< URL::URL::URLNode> node, uint8_t& mainFlag, const char* delims)
 	{
-
 		startString.remove_prefix(removeIndex);
 		if (startString.empty())
-			return true;
+			mainFlag = 1;
+		uint8_t flag;
 		for (;;)
 		{
-			if (startString.find_first_not_of(delims) == std::string::npos)
-				break;
+			flag = 0;
+			if (startString.find_first_not_of(delims) != std::string::npos)
+			{
+				ProcessSpecialCase(startString, node->m_domain, flag);
+				if (flag == 1)
+					break;
+			}
+
+			//need to process port or not
 			if (startString[0] == ':' || startString[0] == '/')
 			{
-				size_t pathEnd = startString.find_first_of(delims, 1);
-				if (pathEnd == std::string::npos)
-				{
-					node->m_path.emplace_back(startString.substr(1));
+				ProcessSpecialCase(startString, node->m_path, flag);
+				if (flag == 1)
 					break;
-				}
-				else
-				{
-					node->m_path.emplace_back(startString.begin() + 1, startString.begin() + pathEnd);
-					startString.remove_prefix(pathEnd);
-				}
 			}
-			if (startString[0] == '/')
-			{
-				size_t pathEnd = startString.find_first_of(delims, 1);
-				if (pathEnd == std::string::npos)
-				{
-					node->m_path.emplace_back(startString.substr(1));
-					break;
-				}
-				else
-				{
-					node->m_path.emplace_back(startString.begin() + 1, startString.begin() + pathEnd);
-					startString.remove_prefix(pathEnd);
-				}
-			}
-			//CheckDelsim(startString, delims, node)
 			if (startString[0] == '?')
 			{
-				size_t pathEnd = startString.find_first_of(delims, 1);
-				if (pathEnd == std::string::npos)
+				if (startString[1] == 'q' && startString[2] == '=')
 				{
-					node->m_query = startString.substr(1);
-					break;
+					startString.remove_prefix(2);
+					ProcessSpecialCase(startString, node->m_query, flag);
 				}
 				else
 				{
-					node->m_query = startString.substr(1, pathEnd - 1);
-					startString.remove_prefix(pathEnd);
+					break;
 				}
+				
+				if (flag == 1)
+					break;
 			}
 			if (startString[0] == '#')
 			{
-				size_t pathEnd = startString.find_first_of(delims, 1);
-				if (pathEnd == std::string::npos)
-				{
-					node->m_fragment = startString.substr(1);
+				ProcessSpecialCase(startString, node->m_fragment, flag);
+				if (flag == 1)
 					break;
-				}
-				else
-				{
-					node->m_fragment = startString.substr(1, pathEnd - 1);
-					startString.remove_prefix(pathEnd);
-				}
 			}
 		}
+		mainFlag = 0;
 	}
-
-	//TODO: mb rafactor
-	//void CheckDelsim(std::string_view& startString, const char* delims, std::shared_ptr< URL::URL::URLNode> node)
-	//{
-	//	size_t pathEnd = startString.find_first_of(delims, 1);
-	//	std::string make;
-	//	if (startString[0] == '?')
-	//	{
-	//		make = node->m_query;
-	//	}
-	//	else if (startString[0] == '#')
-	//	{
-	//		make = node->m_fragment;
-	//	}
-	//	if (pathEnd == std::string::npos)
-	//	{
-	//		make = startString.substr(1);
-	//		return;
-	//	}
-	//	else
-	//	{
-	//		make = startString.substr(1, pathEnd - 1);
-	//		startString.remove_prefix(pathEnd);
-	//	}
-	//}
+	void ProcessSpecialCase(std::string_view& str, std::string& out, uint8_t& flag, const char* delims)
+	{
+		size_t pathEnd = str.find_first_of(delims, 1);
+		if (pathEnd == std::string::npos)
+		{
+			out = str.substr(1);
+			flag = 1;
+		}
+		else
+		{
+			out = str.substr(1, pathEnd - 1);
+			str.remove_prefix(pathEnd);
+			flag = 0;
+		}
+	}
+	void ProcessSpecialCase(std::string_view& str, std::vector< std::string >& out, uint8_t& flag, const char* delims)
+	{
+		size_t pathEnd = str.find_first_of(delims, 1);
+		if (pathEnd == std::string::npos)
+		{
+			out.emplace_back(str.substr(1));
+			flag = 1;
+		}
+		else
+		{
+			out.emplace_back(str.begin() + 1, str.begin() + pathEnd);
+			str.remove_prefix(pathEnd);
+			flag = 0;
+		}
+	}
 	bool ParseUint16(std::string_view& str, uint16_t& portNumber, size_t& count)
 	{
 		uint32_t tmpPort = 0;
