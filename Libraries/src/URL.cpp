@@ -8,6 +8,7 @@ namespace
 	void ProcessSpecialCase(std::string_view& str, std::vector< std::string >& out, uint8_t& flag, const char* delims = "/?#:");
 	void ParseRestString(std::string_view& startString, size_t removeIndex, std::shared_ptr< URL::URL::URLNode> node, uint8_t& mainFlag, const char* delims = "/?#:");
 	bool ParseUint16(std::string_view& str, uint16_t& portNumber, uint8_t& count);
+	std::string_view addSign(std::string_view& str, std::string& buffer, char sign = '@', size_t delim = 0);
 }
 
 namespace URL
@@ -66,12 +67,13 @@ namespace URL
 	{
 		m_node->m_port = 0;
 		std::string_view startString = url;
+		std::string tmp;
 
 		size_t schemeDelimiter = startString.find(':');
 		uint8_t mainFlag = 0;
-		std::string_view schemeOrDomain = startString.substr(0, schemeDelimiter);
-
+		auto schemeOrDomain = startString.substr(0, schemeDelimiter);
 		size_t notSchemeDelimiter = schemeOrDomain.find_first_of("./@");
+
 		if (notSchemeDelimiter == std::string::npos)
 		{
 			m_node->m_scheme = schemeOrDomain;
@@ -87,13 +89,7 @@ namespace URL
 				}
 				else
 				{
-					std::string tmp;
-					size_t length = startString.length();
-					tmp.resize(length + 1);
-					tmp[0] = '@';
-					startString.copy(tmp.data() + 1, length, 0);
-					std::string_view rest = tmp;
-
+					auto rest = addSign(startString, tmp);
 					m_node->m_userInfo.clear();
 					ParseRestString(rest, 0, m_node, mainFlag);
 				}
@@ -104,9 +100,7 @@ namespace URL
 				{
 					startString.remove_prefix(1);
 					m_node->m_userInfo = startString.substr(0, userDelim - 1);
-					std::string tmp = startString.data();
-					tmp[userDelim - 1] = ':';
-					std::string_view rest = tmp;
+					auto rest = addSign(startString, tmp, ':', userDelim - 1);
 					ParseRestString(rest, userDelim - 1, m_node, mainFlag);
 					if (mainFlag == 1)
 						return true;
@@ -132,15 +126,8 @@ namespace URL
 			}
 			else
 			{
-				//TODO: remake mb
 				m_node->m_userInfo.clear();
-
-				std::string tmp;
-				size_t length = startString.length();
-				tmp.resize(length + 1);
-				tmp[0] = '@';
-				startString.copy(tmp.data() + 1, length, 0);
-				std::string_view rest = tmp;
+				auto rest = addSign(startString, tmp);
 				ParseRestString(rest, 0, m_node, mainFlag);
 				if (mainFlag == 1)
 					return true;
@@ -152,6 +139,26 @@ namespace URL
 
 namespace
 {
+	std::string_view addSign(std::string_view& str, std::string& buffer, char sign, size_t delim)
+	{
+		std::string_view rest;
+		buffer.resize(str.length() + 1);
+		if (sign == ':')
+		{
+			buffer = str.data();
+			buffer[delim] = ':';
+			rest = buffer;
+		}
+		else
+		{
+			size_t length = str.length();
+			buffer.resize(length + 1);
+			buffer[0] = sign;
+			str.copy(buffer.data() + 1, length, 0);
+			rest = buffer;
+		}
+		return rest;
+	}
 	void ParseRestString(std::string_view& startString, size_t removeIndex, std::shared_ptr< URL::URL::URLNode> node, uint8_t& mainFlag, const char* delims)
 	{
 		startString.remove_prefix(removeIndex);

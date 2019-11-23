@@ -17,7 +17,6 @@ namespace URL
 		// API
 		URL();
 
-
 		bool ParseURL(const std::string& url);
 		std::string GetScheme() const;
 		std::string GetUserInfo() const;

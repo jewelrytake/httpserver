@@ -130,3 +130,40 @@ TEST(URLTest, CorrectDomainsPathsPortsQueriesFragmentsUserInfos)
 		++index;
 	}
 }
+
+
+TEST(UrlTest, OSPath)
+{
+	URL::URL url;
+	struct TestVector
+	{
+		std::string urlString;
+		std::string urlScheme;
+		std::string userInfo;
+		std::string urlDomain;
+		std::vector< std::string > paths;
+		uint16_t urlPort;
+		std::string urlQuery;
+		std::string urlFragment;
+	};
+
+	const std::vector< TestVector > tests =
+	{
+		{"C://smooth", "C", {}, {}, {"smooth"}, 0, {}, {} }
+	};
+
+	size_t index = 0;
+	for (const auto& test : tests)
+	{
+		URL::URL url;
+		ASSERT_TRUE(url.ParseURL(test.urlString)) << index;
+		ASSERT_EQ(test.urlScheme, url.GetScheme()) << index;
+		ASSERT_EQ(test.userInfo, url.GetUserInfo()) << index;
+		ASSERT_EQ(test.urlDomain, url.GetDomain()) << index;
+		ASSERT_EQ(test.paths, url.GetPath()) << index;
+		ASSERT_EQ(test.urlPort, url.GetPort()) << index;
+		ASSERT_EQ(test.urlQuery, url.GetQuery()) << index;
+		ASSERT_EQ(test.urlFragment, url.GetFragment()) << index;
+		++index;
+	}
+}
