@@ -27,5 +27,11 @@
     <ClCompile Include="uri\URLTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="network\Network.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ip\IPTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

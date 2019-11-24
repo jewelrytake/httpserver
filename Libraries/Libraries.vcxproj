@@ -150,11 +150,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Uri.hpp" />
+    <ClInclude Include="include\Initializer.h" />
+    <ClInclude Include="include\IPAddress.h" />
+    <ClInclude Include="include\IPVersion.h" />
+    <ClInclude Include="include\Packet.hpp" />
+    <ClInclude Include="include\TCPSocket.h" />
+    <ClInclude Include="include\UDPSocket.hpp" />
     <ClInclude Include="include\URL.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Uri.cpp" />
+    <ClCompile Include="src\Initializer.cpp" />
+    <ClCompile Include="src\IPAddress.cpp" />
+    <ClCompile Include="src\TCPSocket.cpp" />
+    <ClCompile Include="src\UDPSocket.cpp" />
     <ClCompile Include="src\URL.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
