@@ -9,7 +9,7 @@ namespace Network
 	{
 
 		//API
-		TCPSocket(int type = SOCK_STREAM, int protocol = IPPROTO_TCP, SOCKET handle = INVALID_SOCKET, IPVersion version = IPVersion::IPv4);
+		TCPSocket(IPVersion version = IPVersion::IPv4, int type = SOCK_STREAM, int protocol = IPPROTO_TCP, SOCKET handle = INVALID_SOCKET);
 		~TCPSocket();
 
 		bool Create();
@@ -28,9 +28,9 @@ namespace Network
 		bool Recv(Packet& packet);
 
 	private:
+		IPVersion m_ipVersion;
 		int m_type;
 		int m_protocol;
 		SOCKET m_handle;
-		IPVersion m_ipVersion;
 	};
 }

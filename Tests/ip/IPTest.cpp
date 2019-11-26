@@ -27,3 +27,4 @@ TEST(IPTest, IPv6)
 	std::vector< uint8_t > bytesStream = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 	ASSERT_EQ(ip.GetStream(), bytesStream);
 }
+

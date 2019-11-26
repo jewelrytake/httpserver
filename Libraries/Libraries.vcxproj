@@ -150,10 +150,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Constants.h" />
+    <ClInclude Include="include\IncludeMe.h" />
     <ClInclude Include="include\Initializer.h" />
     <ClInclude Include="include\IPAddress.h" />
     <ClInclude Include="include\IPVersion.h" />
+    <ClInclude Include="include\NetworkUtility.h" />
     <ClInclude Include="include\Packet.hpp" />
+    <ClInclude Include="include\PacketManager.h" />
+    <ClInclude Include="include\PacketType.h" />
+    <ClInclude Include="include\Server.h" />
+    <ClInclude Include="include\TCPConnection.h" />
     <ClInclude Include="include\TCPSocket.h" />
     <ClInclude Include="include\UDPSocket.hpp" />
     <ClInclude Include="include\URL.hpp" />
@@ -161,6 +168,11 @@
   <ItemGroup>
     <ClCompile Include="src\Initializer.cpp" />
     <ClCompile Include="src\IPAddress.cpp" />
+    <ClCompile Include="src\NetworkUtility.cpp" />
+    <ClCompile Include="src\Packet.cpp" />
+    <ClCompile Include="src\PacketManager.cpp" />
+    <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\TCPConnection.cpp" />
     <ClCompile Include="src\TCPSocket.cpp" />
     <ClCompile Include="src\UDPSocket.cpp" />
     <ClCompile Include="src\URL.cpp" />

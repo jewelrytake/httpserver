@@ -161,6 +161,7 @@
     <ClCompile Include="..\..\googletest-master\googletest\src\gtest-all.cc" />
     <ClCompile Include="..\..\googletest-master\googletest\src\gtest_main.cc" />
     <ClCompile Include="ip\IPTest.cpp" />
+    <ClCompile Include="ip\PacketTest.cpp" />
     <ClCompile Include="network\Network.cpp" />
     <ClCompile Include="uri\UriTest.cpp" />
     <ClCompile Include="uri\URLTests.cpp" />

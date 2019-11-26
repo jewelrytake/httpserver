@@ -1,7 +1,7 @@
 #include <TCPSocket.h>
 #include <assert.h>
 
-Network::TCPSocket::TCPSocket(int type, int protocol, SOCKET handle, IPVersion version):
+Network::TCPSocket::TCPSocket(IPVersion version, int type, int protocol, SOCKET handle):
 	m_type(type), m_protocol(protocol), m_handle(handle), m_ipVersion(version)
 {
 }
@@ -101,7 +101,7 @@ bool Network::TCPSocket::Accept(TCPSocket& outSocket, IPAddress* ip)
 		{
 			*ip = IPAddress((sockaddr*)&addr);
 		}
-		outSocket = TCPSocket(SOCK_STREAM, IPPROTO_TCP, acceptedConnectionHandle, IPVersion::IPv4);
+		outSocket = TCPSocket(IPVersion::IPv4, SOCK_STREAM, IPPROTO_TCP, acceptedConnectionHandle);
 	}
 	else //IPv6
 	{
@@ -117,7 +117,7 @@ bool Network::TCPSocket::Accept(TCPSocket& outSocket, IPAddress* ip)
 		{
 			*ip = IPAddress((sockaddr*)&addr);
 		}
-		outSocket = TCPSocket(SOCK_STREAM, IPPROTO_TCP, acceptedConnectionHandle, IPVersion::IPv6);
+		outSocket = TCPSocket(IPVersion::IPv4, SOCK_STREAM, IPPROTO_TCP, acceptedConnectionHandle);
 	}
 	return true;
 }
