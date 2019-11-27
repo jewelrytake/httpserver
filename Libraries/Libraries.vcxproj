@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Client.h" />
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\IncludeMe.h" />
     <ClInclude Include="include\Initializer.h" />
@@ -166,6 +167,7 @@
     <ClInclude Include="include\URL.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\Initializer.cpp" />
     <ClCompile Include="src\IPAddress.cpp" />
     <ClCompile Include="src\NetworkUtility.cpp" />
