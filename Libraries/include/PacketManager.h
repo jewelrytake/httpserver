@@ -16,7 +16,7 @@ namespace Network
 		void Clear();
 		bool HasPendingPackets();
 		void Append(std::shared_ptr<Packet> packet);
-		std::shared_ptr<Packet> Retrieve();
+		std::shared_ptr<Packet> GetCurrentPacket();
 		void Pop();
 		uint16_t currentPacketSize = 0;
 		size_t currentPacketExtractionOffset = 0;

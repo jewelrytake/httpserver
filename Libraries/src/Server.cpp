@@ -66,7 +66,7 @@ namespace Network
 					connectedFD.events = POLLRDNORM;
 					connectedFD.revents = 0;
 					m_master_fd.emplace_back(connectedFD);
-					OnConnect(acceptedConnection, *this);
+					OnConnect(acceptedConnection);
 					//m_use_fd.emplace_back(connectedFD);
 				}
 				else
@@ -84,17 +84,17 @@ namespace Network
 				TCPConnection& connection = m_connections[connectionIndex];
 				if (m_use_fd[i].revents & POLLERR) //If error occurred on this socket
 				{
-					CloseConnection(connectionIndex, "POLLERR", *this);
+					CloseConnection(connectionIndex, "POLLERR");
 					continue;
 				}
 				if (m_use_fd[i].revents & POLLHUP) //If poll hangup occurred on this socket
 				{
-					CloseConnection(connectionIndex, "POLLHUP", *this);
+					CloseConnection(connectionIndex, "POLLHUP");
 					continue;
 				}
 				if (m_use_fd[i].revents & POLLNVAL) //If invalid socket
 				{
-					CloseConnection(connectionIndex, "Invalid socket", *this);
+					CloseConnection(connectionIndex, "Invalid socket");
 					continue;
 				}
 #pragma endregion End of ERROR_CHECKING
@@ -124,7 +124,7 @@ namespace Network
 					}
 					if (bytesReceived == 0) //If connection was lost
 					{
-						CloseConnection(connectionIndex, "Recv == 0", *this);
+						CloseConnection(connectionIndex, "Recv == 0");
 						continue;
 					}
 					if (bytesReceived == SOCKET_ERROR) //If error occurred on socket
@@ -132,7 +132,7 @@ namespace Network
 						int error = WSAGetLastError();
 						if (error != WSAEWOULDBLOCK)
 						{
-							CloseConnection(connectionIndex, "Recv < 0", *this);
+							CloseConnection(connectionIndex, "Recv < 0");
 							continue;
 						}
 					}
@@ -160,7 +160,7 @@ namespace Network
 					{
 						if (pm.m_currentTask == PacketTask::ProcessPacketSize)
 						{
-							pm.currentPacketSize = (uint16_t)pm.Retrieve()->m_buffer.size();
+							pm.currentPacketSize = (uint16_t)pm.GetCurrentPacket()->m_buffer.size();
 							uint16_t netPacketSize = htons(pm.currentPacketSize);
 							int bytesSent = send(
 								m_use_fd[i].fd,
@@ -171,6 +171,7 @@ namespace Network
 							{
 								pm.currentPacketExtractionOffset += bytesSent;
 							}
+							//if full packet was sent
 							if (pm.currentPacketExtractionOffset == sizeof(uint16_t))
 							{
 								pm.currentPacketExtractionOffset = 0;
@@ -185,7 +186,7 @@ namespace Network
 						}
 						else
 						{
-							uint8_t* bufferPtr = &pm.Retrieve()->m_buffer[0];
+							uint8_t* bufferPtr = &pm.GetCurrentPacket()->m_buffer[0];
 							int bytesSent = send(
 								m_use_fd[i].fd,
 								(char*)bufferPtr + pm.currentPacketExtractionOffset,
@@ -216,25 +217,45 @@ namespace Network
 		}
 #pragma endregion End code specific to send data to client
 
+#pragma region Process incoming packets
 		for (int i = m_connections.size() - 1; i >= 0; i--)
 		{
 			while (m_connections[i].pm_incoming.HasPendingPackets())
 			{
-				std::shared_ptr<Packet> frontPacket = m_connections[i].pm_incoming.Retrieve();
+				std::shared_ptr<Packet> frontPacket = m_connections[i].pm_incoming.GetCurrentPacket();
 				if (!ProcessPacket(frontPacket))
 				{
-					CloseConnection(i, "Failed to process incoming packet.", *this);
+					CloseConnection(i, "Failed to process incoming packet.");
 					break;
 				}
 				m_connections[i].pm_incoming.Pop();
 			}
 		}
+#pragma endregion End of process incoming packets
+	}	
+	void Server::OnConnect(TCPConnection& newConnection)
+	{
+		std::cout << newConnection.ToString() << " - New connection accepted.\n";
 	}
 
-	
+	void Server::OnDisconnect(TCPConnection& lostConnection, std::string&& reason)
+	{
+		std::cout << "[" << reason << "] Connection lost: " << lostConnection.ToString() << ".\n";
+	}
 
+	void Server::CloseConnection(int connectionIndex, std::string&& reason)
+	{
+		TCPConnection& connection = m_connections[connectionIndex];
+		OnDisconnect(connection, std::move(reason));
+		m_master_fd.erase(m_master_fd.begin() + (connectionIndex + 1));
+		m_use_fd.erase(m_use_fd.begin() + (connectionIndex + 1));
+		connection.Close();
+		m_connections.erase(m_connections.begin() + connectionIndex);
+	}
 
-	
-
-	
+	bool Server::ProcessPacket(std::shared_ptr<Packet> packet)
+	{
+		std::cout << "Packet received with size: " << packet->m_buffer.size() << '\n';
+		return true;
+	}
 }

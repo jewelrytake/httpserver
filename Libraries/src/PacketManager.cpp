@@ -15,7 +15,7 @@ void Network::PacketManager::Append(std::shared_ptr<Packet> p)
 	m_packets.emplace(std::move(p));
 }
 
-std::shared_ptr<Network::Packet> Network::PacketManager::Retrieve()
+std::shared_ptr<Network::Packet> Network::PacketManager::GetCurrentPacket()
 {
 	return m_packets.front();
 }

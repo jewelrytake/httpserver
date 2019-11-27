@@ -12,13 +12,11 @@ namespace Network
 		Packet(PacketType packetType = PacketType::PT_Invalid);
 		PacketType GetPacketType();
 
-		Packet& operator << (uint32_t data);//insertion operator
-		Packet& operator >> (uint32_t& data);//extraction operator
-		Packet& operator << (const std::vector< uint8_t >& data);//insertion operator
-		Packet& operator >> (std::vector< uint8_t >& data);//extraction operator
-	
-		//where to read
-		uint32_t m_extractionOffset = 0;
+		Packet& operator << (uint32_t data); //insertion operator
+		Packet& operator >> (uint32_t& data); //extraction operator
+		Packet& operator << (const std::vector< uint8_t >& data); //insertion operator
+		Packet& operator >> (std::vector< uint8_t >& data); //extraction operator
+		uint32_t m_extractionOffset = 0; //where to read
 		std::vector<uint8_t> m_buffer;
 	private:
 		void AssignPacketType(PacketType packetType);

@@ -20,10 +20,7 @@ namespace Network
 		bool Listen(IPAddress& endpoint, int backlog = 5);
 		bool Accept(TCPSocket& outSocket, IPAddress* ip = nullptr);
 		bool Connect(IPAddress& endpoint);
-		//bool Send(const void* data, int numberOfBytes, int& bytesSent);
-		//bool Recv(void* destination, int numberOfBytes, int& bytesReceived);
-		//bool SendAll(const void* data, int numberOfBytes);
-		//bool RecvAll(void* destination, int numberOfBytes);
+	
 		bool Send(Packet& packet);
 		bool Recv(Packet& packet);
 
