@@ -20,6 +20,8 @@ namespace Network
 		bool Listen(IPAddress& endpoint, int backlog = 5);
 		bool Accept(TCPSocket& outSocket, IPAddress* ip = nullptr);
 		bool Connect(IPAddress& endpoint);
+
+		bool SetBlocking(bool isBlocking);
 	
 		bool Send(Packet& packet);
 		bool Recv(Packet& packet);

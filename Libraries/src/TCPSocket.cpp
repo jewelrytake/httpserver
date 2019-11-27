@@ -22,6 +22,10 @@ bool Network::TCPSocket::Create()
 		int error = WSAGetLastError();
 		return false;
 	}
+	if (!SetBlocking(false))
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -138,6 +142,21 @@ bool Network::TCPSocket::Connect(IPAddress& ip)
 		addr = (sockaddr*)(&ip.GetIPv6Address());
 	}
 	if (connect(m_handle, addr, len) != 0) //if an error occurred
+	{
+		int error = WSAGetLastError();
+		return false;
+	}
+	return true;
+}
+
+bool Network::TCPSocket::SetBlocking(bool isBlocking)
+{
+	unsigned long nonBlocking = 1;
+	unsigned long blocking = 0;
+	// If isBlocking = 0, blocking is enabled; 
+	// If isBlocking != 0, non-blocking mode is enabled.
+	int result = ioctlsocket(m_handle, FIONBIO, isBlocking ? &blocking : &nonBlocking);
+	if (result == SOCKET_ERROR)
 	{
 		int error = WSAGetLastError();
 		return false;

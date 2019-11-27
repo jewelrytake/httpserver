@@ -9,4 +9,4 @@ enum class ConditionStrategy : uint8_t
 };
 
 void ProcessPacketContent(Network::TCPConnection& connection);
-ConditionStrategy ProcessPacketSize(Network::TCPConnection& connection, int bytesReceived, int connectionIndex, Network::Server& server, ConditionStrategy cs);
+ConditionStrategy ProcessPacketSize(Network::TCPConnection& connection, int bytesReceived, ConditionStrategy cs);

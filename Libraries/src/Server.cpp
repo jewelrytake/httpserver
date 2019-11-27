@@ -139,8 +139,11 @@ namespace Network
 					if (bytesReceived > 0)
 					{
 						connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
-						if (ProcessPacketSize(connection, bytesReceived, connectionIndex, *this, ConditionStrategy::ST_CONTINUE) == ConditionStrategy::ST_CONTINUE)
+						if (ProcessPacketSize(connection, bytesReceived, ConditionStrategy::ST_CONTINUE) == ConditionStrategy::ST_CONTINUE)
+						{
+							CloseConnection(connectionIndex, "Packet size too large."); 
 							continue;
+						}
 						else //Processing packet contents
 						{
 							if (connection.pm_incoming.currentPacketExtractionOffset == connection.pm_incoming.currentPacketSize)
