@@ -2,7 +2,7 @@
 #include "PacketType.h"
 #define WIN32_LEAN_AND_MEAN
 #include <vector>
-#include <winsock.h>
+#include <WinSock2.h>
 #include <string>
 
 namespace Network

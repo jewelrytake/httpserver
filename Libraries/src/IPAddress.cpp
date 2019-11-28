@@ -3,12 +3,6 @@
 #include <assert.h>
 #include <algorithm>
 
-namespace
-{
-	//TODO: utils
-
-}
-
 Network::IPAddress::~IPAddress() = default;
 
 Network::IPAddress::IPAddress()

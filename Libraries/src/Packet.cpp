@@ -37,9 +37,6 @@ void Network::Packet::Append(const void* data, uint32_t size)
 	m_buffer.insert(m_buffer.end(), (char*)data, (char*)data + size);
 }
 
-
-
-
 void Network::Packet::AppendInteger(const uint32_t* data, uint32_t size)
 {
 	if ((m_buffer.size() + size) > Network::g_maxPacketSize)
@@ -48,10 +45,11 @@ void Network::Packet::AppendInteger(const uint32_t* data, uint32_t size)
 	}
 	for (uint32_t i = 0; i < size; i++)
 	{
-		m_buffer.insert(m_buffer.end(), &data[i], &data[i] + 4);
+		unsigned char tmp[4] = { 0 };
+		DecomposeInt_32(tmp, data[i]);
+		m_buffer.insert(m_buffer.end(), &tmp[0], &tmp[4]);
 	}
 }
-
 
 //data is 4 bytes. It's size variable.
 //how many bytes will be send, and how many bytes need to recieve
@@ -62,6 +60,7 @@ Network::Packet& Network::Packet::operator<<(uint32_t data)
 	Append(&data, sizeof(uint32_t));
 	return *this;
 }
+
 //read size to variable(data)
 //how many bytes need to read
 //data is 4 bytes, so we we'll read 4 bytes
@@ -126,11 +125,16 @@ Network::Packet& Network::Packet::operator >> (std::vector < uint32_t >& data)
 
 	for (uint32_t i = 0; i < size; i++)
 	{
-		uint32_t u0 = m_buffer[m_extractionOffset + 0], u1 = m_buffer[m_extractionOffset + 1],
-			u2 = m_buffer[m_extractionOffset + 2], u3 = m_buffer[m_extractionOffset + 3];
-		uint32_t uval = u3 ^ (u2 << 8) ^ (u1 << 16) ^ u3;
+		unsigned char tmp[4] = 
+		{
+			m_buffer[m_extractionOffset],
+			m_buffer[m_extractionOffset + 1],
+			m_buffer[m_extractionOffset + 2],
+			m_buffer[m_extractionOffset + 3]
+		};
+		data[i] = ComposeInt_32(tmp);
+		
 		m_extractionOffset += sizeof(uint32_t);
-		int a = 01;
 	}
 	
 	return *this;
