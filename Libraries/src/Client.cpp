@@ -102,7 +102,7 @@ bool Network::Client::Frame()
 			if (bytesReceived > 0)
 			{
 				m_connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
-				if (ProcessPacketSize(m_connection, bytesReceived, ConditionStrategy::ST_CONTINUE) == ConditionStrategy::ST_CONTINUE)
+				if (ProcessPacketSize(m_connection, ConditionStrategy::ST_CONTINUE) == ConditionStrategy::ST_CONTINUE)
 				{
 					CloseConnection("Packet size too large.");
 					return false;
@@ -189,6 +189,16 @@ bool Network::Client::Frame()
 		m_connection.pm_incoming.Pop();
 	}
 	return true;
+}
+
+void Network::Client::Send(std::shared_ptr<Packet> packet)
+{
+	m_connection.pm_outgoing.Append(packet);
+}
+
+void Network::Client::Receive(std::shared_ptr<Packet> packet)
+{
+	
 }
 
 bool Network::Client::ProcessPacket(std::shared_ptr<Packet> packet)

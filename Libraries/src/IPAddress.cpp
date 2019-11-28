@@ -1,6 +1,7 @@
 #include <IPAddress.h>
 #include <iostream>
 #include <assert.h>
+#include <algorithm>
 
 namespace
 {
@@ -36,6 +37,8 @@ Network::IPAddress::IPAddress(sockaddr* addr)
 		memcpy(&m_stream[0], &addrv4->sin_addr, sizeof(ULONG));
 		m_address.resize(16);
 		inet_ntop(AF_INET, &addrv4->sin_addr, &m_address[0], 16);
+		m_address.erase(std::find(m_address.begin(), m_address.end(), '\0'), m_address.end());
+		m_address.shrink_to_fit();
 		m_domain = m_address;
 	}
 	else //IPv6
@@ -47,6 +50,8 @@ Network::IPAddress::IPAddress(sockaddr* addr)
 		memcpy(&m_stream[0], &addrv6->sin6_addr, 16);
 		m_address.resize(46);
 		inet_ntop(AF_INET6, &addrv6->sin6_addr, &m_address[0], 46);
+		m_address.erase(std::find(m_address.begin(), m_address.end(), '\0'), m_address.end());
+		m_address.shrink_to_fit();
 		m_domain = m_address;
 	}
 }

@@ -1,7 +1,22 @@
 #include <NetworkUtility.h>
 #include <iostream>
 
+void DecomposeInt_32(unsigned char* buf, int32_t val)
+{
+	uint32_t uval = val;
+	buf[0] = uval;
+	buf[1] = uval >> 8;
+	buf[2] = uval >> 16;
+	buf[3] = uval >> 24;
+}
 
+int32_t ComposeInt_32(unsigned char* buf)
+{
+	// This prevents buf[i] from being promoted to a signed int.
+	uint32_t u0 = buf[0], u1 = buf[1], u2 = buf[2], u3 = buf[3];
+	uint32_t uval = u0 | (u1 << 8) | (u2 << 16) | (u3 << 24);
+	return uval;
+}
 
 #pragma region Read data
 void ProcessPacketContent(Network::TCPConnection& connection)
@@ -15,7 +30,7 @@ void ProcessPacketContent(Network::TCPConnection& connection)
 	connection.pm_incoming.m_currentTask = Network::PacketTask::ProcessPacketSize;
 }
 
-ConditionStrategy ProcessPacketSize(Network::TCPConnection& connection, int bytesReceived, ConditionStrategy cs)
+ConditionStrategy ProcessPacketSize(Network::TCPConnection& connection, ConditionStrategy cs)
 {
 	
 	if (connection.pm_incoming.m_currentTask == Network::PacketTask::ProcessPacketSize)
@@ -34,6 +49,7 @@ ConditionStrategy ProcessPacketSize(Network::TCPConnection& connection, int byte
 			connection.pm_incoming.m_currentTask = Network::PacketTask::ProcessPacketContents;
 		}
 	}
+	return ConditionStrategy::ST_NONE;
 }
 #pragma endregion End code specific to read data
 

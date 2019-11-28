@@ -30,10 +30,16 @@
     <ClCompile Include="network\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ip\IPTest.cpp">
+    <ClCompile Include="network\IPTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ip\PacketTest.cpp">
+    <ClCompile Include="network\SocketTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="network\PackageManagerTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="network\PacketTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

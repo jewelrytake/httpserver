@@ -14,13 +14,16 @@ namespace Network
 
 		Packet& operator << (uint32_t data); //insertion operator
 		Packet& operator >> (uint32_t& data); //extraction operator
-		Packet& operator << (const std::vector< uint8_t >& data); //insertion operator
-		Packet& operator >> (std::vector< uint8_t >& data); //extraction operator
+		Packet& operator << (const std::vector< uint8_t > & data); //insertion operator
+		Packet& operator >> (std::vector< uint8_t > & data); //extraction operator
+		Packet& operator << (const std::vector< uint32_t >& data);
+		Packet& operator >> (std::vector < uint32_t >& data);
 		uint32_t m_extractionOffset = 0; //where to read
 		std::vector<uint8_t> m_buffer;
 	private:
 		void AssignPacketType(PacketType packetType);
 		void Clear();
 		void Append(const void* data, uint32_t size);
+		void AppendInteger(const uint32_t* data, uint32_t size);
 	};
 }

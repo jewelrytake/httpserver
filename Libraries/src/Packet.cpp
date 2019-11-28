@@ -1,6 +1,7 @@
 #include <Packet.hpp>
 #include <Constants.h>
 #include <iostream>
+#include <NetworkUtility.h>
 
 Network::Packet::Packet(PacketType packetType)
 {
@@ -35,6 +36,23 @@ void Network::Packet::Append(const void* data, uint32_t size)
 	}
 	m_buffer.insert(m_buffer.end(), (char*)data, (char*)data + size);
 }
+
+
+
+
+void Network::Packet::AppendInteger(const uint32_t* data, uint32_t size)
+{
+	if ((m_buffer.size() + size) > Network::g_maxPacketSize)
+	{
+		std::cerr << "Packet size exceeds max buffer size.\n";
+	}
+	for (uint32_t i = 0; i < size; i++)
+	{
+		m_buffer.insert(m_buffer.end(), &data[i], &data[i] + 4);
+	}
+}
+
+
 //data is 4 bytes. It's size variable.
 //how many bytes will be send, and how many bytes need to recieve
 //Write 4 bytes to packet class
@@ -53,8 +71,7 @@ Network::Packet& Network::Packet::operator>>(uint32_t& data)
 {
 	if ((m_extractionOffset + sizeof(uint32_t)) > m_buffer.size())
 	{
-		std::cerr << "\b\tOffset exceeds max buffer size.\n";
-		exit(EXIT_FAILURE);
+		std::cerr << "\nOffset exceeds max buffer size.\n";
 	}
 	data = *reinterpret_cast<uint32_t*>(&m_buffer[m_extractionOffset]);
 	data = ntohl(data);
@@ -81,11 +98,41 @@ Network::Packet& Network::Packet::operator>>(std::vector< uint8_t >& data)
 		std::cerr << "[Packet::operator >>(std::string &)] - Extraction offset exceeded buffer size.\n";
 	data.resize(size);
 	
-	for (int i = 0; i < size; i++)
+	for (uint32_t i = 0; i < size; i++)
 	{
 		data[i] = m_buffer[i + m_extractionOffset];
 	}
 	m_extractionOffset += size;
+	return *this;
+}
+
+
+Network::Packet& Network::Packet::operator << (const std::vector< uint32_t >& data)
+{
+	*this << (uint32_t)data.size();
+	AppendInteger(data.data(), data.size());
+	return *this;
+}
+Network::Packet& Network::Packet::operator >> (std::vector < uint32_t >& data)
+{
+	//clear old data
+	data.clear();
+	uint32_t size = 0;
+	//retrieve string size from Packet& Packet::operator>>(uint32_t& data)
+	*this >> size;
+	if ((m_extractionOffset + size) > m_buffer.size())
+		std::cerr << "[Packet::operator >>(std::string &)] - Extraction offset exceeded buffer size.\n";
+	data.resize(size);
+
+	for (uint32_t i = 0; i < size; i++)
+	{
+		uint32_t u0 = m_buffer[m_extractionOffset + 0], u1 = m_buffer[m_extractionOffset + 1],
+			u2 = m_buffer[m_extractionOffset + 2], u3 = m_buffer[m_extractionOffset + 3];
+		uint32_t uval = u3 ^ (u2 << 8) ^ (u1 << 16) ^ u3;
+		m_extractionOffset += sizeof(uint32_t);
+		int a = 01;
+	}
+	
 	return *this;
 }
 

@@ -7,7 +7,6 @@ namespace Network
 {
 	struct TCPSocket 
 	{
-
 		//API
 		TCPSocket(IPVersion version = IPVersion::IPv4, int type = SOCK_STREAM, int protocol = IPPROTO_TCP, SOCKET handle = INVALID_SOCKET);
 		~TCPSocket();
@@ -20,16 +19,15 @@ namespace Network
 		bool Listen(IPAddress& endpoint, int backlog = 5);
 		bool Accept(TCPSocket& outSocket, IPAddress* ip = nullptr);
 		bool Connect(IPAddress& endpoint);
-
+		int GetType();
+		int GetProtocol();
 		bool SetBlocking(bool isBlocking);
-	
-		bool Send(Packet& packet);
-		bool Recv(Packet& packet);
-
+		bool IsBlocking();
 	private:
 		IPVersion m_ipVersion;
 		int m_type;
 		int m_protocol;
 		SOCKET m_handle;
+		bool m_isBlocking = false;
 	};
 }

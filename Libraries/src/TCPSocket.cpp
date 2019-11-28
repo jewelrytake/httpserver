@@ -3,8 +3,7 @@
 
 Network::TCPSocket::TCPSocket(IPVersion version, int type, int protocol, SOCKET handle):
 	m_type(type), m_protocol(protocol), m_handle(handle), m_ipVersion(version)
-{
-}
+{}
 
 Network::TCPSocket::~TCPSocket() = default;
 
@@ -58,18 +57,25 @@ bool Network::TCPSocket::Bind(IPAddress& ip)
 {
 	assert(m_ipVersion == ip.GetVersion());
 
-	sockaddr* addr = {};
 	if (m_ipVersion == IPVersion::IPv4)
 	{
-		addr = (sockaddr*)(&ip.GetIPv4Address());
+		sockaddr_in addr = ip.GetIPv4Address();
+		int result = bind(m_handle, (sockaddr*)(&addr), sizeof(sockaddr_in));
+		if (result != 0) //if an error occurred
+		{
+			int error = WSAGetLastError();
+			return false;
+		}
 	}
-	else
+	else //IPv6
 	{
-		addr = (sockaddr*)(&ip.GetIPv6Address());
-	}
-	if (bind(m_handle, (sockaddr*)(&addr), sizeof(sockaddr_in)) != 0)
-	{
-		return false;
+		sockaddr_in6 addr = ip.GetIPv6Address();
+		int result = bind(m_handle, (sockaddr*)(&addr), sizeof(sockaddr_in6));
+		if (result != 0) //if an error occurred
+		{
+			int error = WSAGetLastError();
+			return false;
+		}
 	}
 	return true;
 }
@@ -129,19 +135,18 @@ bool Network::TCPSocket::Accept(TCPSocket& outSocket, IPAddress* ip)
 bool Network::TCPSocket::Connect(IPAddress& ip)
 {
 	assert(m_ipVersion == ip.GetVersion());
-	size_t len = 0;
-	sockaddr* addr = { 0 };
+	int result = 0;
 	if (m_ipVersion == IPVersion::IPv4)
 	{
-		len = sizeof(sockaddr_in);
-		addr = (sockaddr*)(&ip.GetIPv4Address());
+		sockaddr_in addr = ip.GetIPv4Address();
+		result = connect(m_handle, (sockaddr*)(&addr), sizeof(sockaddr_in));
 	}
 	else //IPv6
 	{
-		len = sizeof(sockaddr_in6);
-		addr = (sockaddr*)(&ip.GetIPv6Address());
+		sockaddr_in6 addr = ip.GetIPv6Address();
+		result = connect(m_handle, (sockaddr*)(&addr), sizeof(sockaddr_in6));
 	}
-	if (connect(m_handle, addr, len) != 0) //if an error occurred
+	if (result != 0) //if an error occurred
 	{
 		int error = WSAGetLastError();
 		return false;
@@ -149,13 +154,32 @@ bool Network::TCPSocket::Connect(IPAddress& ip)
 	return true;
 }
 
+int Network::TCPSocket::GetType()
+{
+	return m_type;
+}
+
+int Network::TCPSocket::GetProtocol()
+{
+	return m_protocol;
+}
+
 bool Network::TCPSocket::SetBlocking(bool isBlocking)
 {
 	unsigned long nonBlocking = 1;
 	unsigned long blocking = 0;
-	// If isBlocking = 0, blocking is enabled; 
-	// If isBlocking != 0, non-blocking mode is enabled.
-	int result = ioctlsocket(m_handle, FIONBIO, isBlocking ? &blocking : &nonBlocking);
+	int result = 0;
+	if (isBlocking == false)
+	{
+		result = ioctlsocket(m_handle, FIONBIO, &nonBlocking);
+		m_isBlocking = false;
+	}
+	else
+	{
+		result = ioctlsocket(m_handle, FIONBIO, &blocking);
+		m_isBlocking = true;
+	}
+
 	if (result == SOCKET_ERROR)
 	{
 		int error = WSAGetLastError();
@@ -164,12 +188,7 @@ bool Network::TCPSocket::SetBlocking(bool isBlocking)
 	return true;
 }
 
-bool Network::TCPSocket::Send(Packet& packet)
+bool Network::TCPSocket::IsBlocking()
 {
-	return false;
-}
-
-bool Network::TCPSocket::Recv(Packet& packet)
-{
-	return false;
+	return m_isBlocking;
 }
