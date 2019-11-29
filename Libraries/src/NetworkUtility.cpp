@@ -1,12 +1,7 @@
 #include <NetworkUtility.h>
 #include <iostream>
 
-void SetSocketStatus(Network::TCPSocket& connected, WSAPOLLFD& connectedFD)
-{
-	connectedFD.fd = connected.GetHandle();
-	connectedFD.events = POLLRDNORM;
-	connectedFD.revents = 0;
-}
+
 
 void DecomposeInt_32(unsigned char* buf, int32_t val)
 {
@@ -83,6 +78,13 @@ void ReceivedBytesError(int receivedBytes, std::string& status)
 			status = "Recv < 0";
 		}
 	}
+}
+
+void SetSocketStatus(Network::TCPSocket& connected, WSAPOLLFD& connectedFD)
+{
+	connectedFD.fd = connected.GetHandle();
+	connectedFD.events = POLLRDNORM;
+	connectedFD.revents = 0;
 }
 
 int ReceiveData(Network::TCPConnection& connection, WSAPOLLFD& use_fd)

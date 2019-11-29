@@ -45,7 +45,10 @@
     <ClCompile Include="network\TCPConnectionTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="network\SercerTest.cpp">
+    <ClCompile Include="network\ServerTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="network\NetworkUtilityTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
