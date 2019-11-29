@@ -35,6 +35,7 @@ namespace Network
 		}
 		return false;
 	}
+	
 	void Server::Frame()
 	{
 		//if the connection has pending packets, we set flags 
@@ -60,12 +61,10 @@ namespace Network
 				if (m_listeningSocket.Accept(connectedSocket, &connectedIp))
 				{
 					m_connections.emplace_back(TCPConnection(connectedSocket, connectedIp));
-					TCPConnection& acceptedConnection = m_connections.back();
-					WSAPOLLFD connectedFD = {};//WSAPOLLFD structure stores socket information used by the WSAPoll function.
-					connectedFD.fd = connectedSocket.GetHandle();
-					connectedFD.events = POLLRDNORM;
-					connectedFD.revents = 0;
+					WSAPOLLFD connectedFD;
+					SetSocketStatus(connectedSocket, connectedFD);
 					m_master_fd.emplace_back(connectedFD);
+					TCPConnection& acceptedConnection = m_connections.back();
 					OnConnect(acceptedConnection);
 					//m_use_fd.emplace_back(connectedFD);
 				}
@@ -82,19 +81,11 @@ namespace Network
 				int connectionIndex = i - 1;
 				//Retrieve socket connected to server 
 				TCPConnection& connection = m_connections[connectionIndex];
-				if (m_use_fd[i].revents & POLLERR) //If error occurred on this socket
+				std::string status;
+				ReventsError(m_use_fd[i], status);
+				if (!status.empty())
 				{
-					CloseConnection(connectionIndex, "POLLERR");
-					continue;
-				}
-				if (m_use_fd[i].revents & POLLHUP) //If poll hangup occurred on this socket
-				{
-					CloseConnection(connectionIndex, "POLLHUP");
-					continue;
-				}
-				if (m_use_fd[i].revents & POLLNVAL) //If invalid socket
-				{
-					CloseConnection(connectionIndex, "Invalid socket");
+					CloseConnection(connectionIndex, std::move(status));
 					continue;
 				}
 #pragma endregion End of ERROR_CHECKING
@@ -102,47 +93,25 @@ namespace Network
 #pragma region Read data from a client
 				if (m_use_fd[i].revents & POLLRDNORM) //If normal data can be read without blocking from a client
 				{
-					int bytesReceived = 0;
-
-					if (connection.pm_incoming.m_currentTask == PacketTask::ProcessPacketSize)
+					int bytesReceived = ReceiveData(connection, m_use_fd[i]);
+					ReceivedBytesError(bytesReceived, status);
+					if (!status.empty())
 					{
-						
-						bytesReceived = recv(
-							m_use_fd[i].fd,
-							(char*)&connection.pm_incoming.currentPacketSize + connection.pm_incoming.currentPacketExtractionOffset,
-							sizeof(uint16_t) - connection.pm_incoming.currentPacketExtractionOffset,
-							0);
-					}
-					else //Recieve Packet Contents
-					{
-						bytesReceived = recv(
-							m_use_fd[i].fd,
-							(char*)&connection.m_buffer + connection.pm_incoming.currentPacketExtractionOffset,
-							connection.pm_incoming.currentPacketSize - connection.pm_incoming.currentPacketExtractionOffset,
-							0);
-
-					}
-					if (bytesReceived == 0) //If connection was lost
-					{
-						CloseConnection(connectionIndex, "Recv == 0");
+						CloseConnection(connectionIndex, std::move(status));
 						continue;
-					}
-					if (bytesReceived == SOCKET_ERROR) //If error occurred on socket
-					{
-						int error = WSAGetLastError();
-						if (error != WSAEWOULDBLOCK)
-						{
-							CloseConnection(connectionIndex, "Recv < 0");
-							continue;
-						}
 					}
 					if (bytesReceived > 0)
 					{
 						connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
-						if (ProcessPacketSize(connection, ConditionStrategy::ST_CONTINUE) == ConditionStrategy::ST_CONTINUE)
+						if (connection.pm_incoming.m_currentTask == Network::PacketTask::ProcessPacketSize)
 						{
-							CloseConnection(connectionIndex, "Packet size too large."); 
-							continue;
+							uint8_t flag = 0;
+							ProcessPacketSize(connection, flag);
+							if (flag == 1)
+							{
+								CloseConnection(connectionIndex, "Packet size too large."); 
+								continue;
+							}
 						}
 						else //Processing packet contents
 						{
@@ -154,61 +123,27 @@ namespace Network
 					}
 				}
 #pragma endregion End code specific to read data from a client
-
+				
 #pragma region Send data to client
 				if (m_use_fd[i].revents & POLLWRNORM)
 				{
+					int flag;
 					PacketManager& pm = connection.pm_outgoing;
 					while (pm.HasPendingPackets())
 					{
 						if (pm.m_currentTask == PacketTask::ProcessPacketSize)
 						{
-							pm.currentPacketSize = (uint16_t)pm.GetCurrentPacket()->m_buffer.size();
-							uint16_t netPacketSize = htons(pm.currentPacketSize);
-							int bytesSent = send(
-								m_use_fd[i].fd,
-								(char*)&netPacketSize + pm.currentPacketExtractionOffset,
-								sizeof(uint16_t) - pm.currentPacketExtractionOffset,
-								0);
-							if (bytesSent > 0)
-							{
-								pm.currentPacketExtractionOffset += bytesSent;
-							}
-							//if full packet was sent
-							if (pm.currentPacketExtractionOffset == sizeof(uint16_t))
-							{
-								pm.currentPacketExtractionOffset = 0;
-								pm.m_currentTask = PacketTask::ProcessPacketContents;
-							}
-							else
-							{
-								//If full packet size was not sent, break out of the loop for sending outgoing packets for this connection
-								//- we'll have to try again next time we are able to write normal data without blocking
+							flag = 0;
+							SendSizeData(pm, m_use_fd[i], flag);
+							if (flag == 1)
 								break;
-							}
 						}
 						else
 						{
-							uint8_t* bufferPtr = &pm.GetCurrentPacket()->m_buffer[0];
-							int bytesSent = send(
-								m_use_fd[i].fd,
-								(char*)bufferPtr + pm.currentPacketExtractionOffset,
-								pm.currentPacketSize - pm.currentPacketExtractionOffset,
-								0);
-							if (bytesSent > 0)
-							{
-								pm.currentPacketExtractionOffset += bytesSent;
-							}
-							if (pm.currentPacketExtractionOffset == pm.currentPacketSize)
-							{
-								pm.currentPacketExtractionOffset = 0;
-								pm.m_currentTask = PacketTask::ProcessPacketSize;
-								pm.Pop();
-							}
-							else
-							{
+							flag = 0;
+							SendSizeData(pm, m_use_fd[i], flag);
+							if (flag == 1)
 								break;
-							}
 						}
 					}
 					if (!pm.HasPendingPackets())

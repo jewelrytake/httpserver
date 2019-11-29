@@ -16,9 +16,7 @@ bool Network::Client::Connect(Network::IPAddress ip)
 			if (socket.SetBlocking(false))
 			{
 				m_connection = TCPConnection(socket, ip);
-				m_master_fd.fd = m_connection.m_socket.GetHandle();
-				m_master_fd.events = POLLRDNORM;
-				m_master_fd.revents = 0;
+				SetSocketStatus(m_connection.m_socket, m_master_fd);
 				m_isConnected = true;
 				OnConnect();
 				return true;
@@ -51,63 +49,36 @@ bool Network::Client::Frame()
 	m_use_fd = m_master_fd;
 	if (WSAPoll(&m_use_fd, 1, 1) > 0)
 	{
-		if (m_use_fd.revents & POLLERR) //If error occurred on this socket
+		std::string status;
+		ReventsError(m_use_fd, status);
+		if (!status.empty())
 		{
-			CloseConnection("POLLERR");
+			CloseConnection(std::move(status));
 			return false;
 		}
-		if (m_use_fd.revents & POLLHUP) //If poll hangup occurred on this socket
-		{
-			CloseConnection("POLLHUP");
-			return false;
-		}
-		if (m_use_fd.revents & POLLNVAL) //If invalid socket
-		{
-			CloseConnection("POLLNVAL");
-			return false;
-		}
+		
 		if (m_use_fd.revents & POLLRDNORM) //If normal data can be read without blocking
 		{
-			int bytesReceived = 0;
-			if (m_connection.pm_incoming.m_currentTask == PacketTask::ProcessPacketSize)
+			int bytesReceived = ReceiveData(m_connection, m_use_fd);
+			ReceivedBytesError(bytesReceived, status);
+			if (!status.empty())
 			{
-				bytesReceived = recv(
-					m_use_fd.fd,
-					(char*)&m_connection.pm_incoming.currentPacketSize + m_connection.pm_incoming.currentPacketExtractionOffset,
-					sizeof(uint16_t) - m_connection.pm_incoming.currentPacketExtractionOffset,
-					0);
-			}
-			else //Process Packet Contents
-			{
-				bytesReceived = recv(
-					m_use_fd.fd,
-					(char*)&m_connection.m_buffer + m_connection.pm_incoming.currentPacketExtractionOffset,
-					m_connection.pm_incoming.currentPacketSize - m_connection.pm_incoming.currentPacketExtractionOffset,
-					0);
-			}
-			if (bytesReceived == 0) //If connection was lost
-			{
-				CloseConnection("Recv==0");
+				CloseConnection(std::move(status));
 				return false;
-			}
-			if (bytesReceived == SOCKET_ERROR) //If error occurred on socket
-			{
-				int error = WSAGetLastError();
-				if (error != WSAEWOULDBLOCK)
-				{
-					CloseConnection("Recv<0");
-					return false;
-				}
 			}
 			if (bytesReceived > 0)
 			{
 				m_connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
-				if (ProcessPacketSize(m_connection, ConditionStrategy::ST_CONTINUE) == ConditionStrategy::ST_CONTINUE)
+				if (m_connection.pm_incoming.m_currentTask == Network::PacketTask::ProcessPacketSize)
 				{
-					CloseConnection("Packet size too large.");
-					return false;
+					uint8_t flag = 0;
+					ProcessPacketSize(m_connection, flag);
+					if(flag == 1)
+					{
+						CloseConnection("Packet size too large.");
+						return false;
+					}
 				}
-					
 				else //Processing packet contents
 				{
 					if (m_connection.pm_incoming.currentPacketExtractionOffset == m_connection.pm_incoming.currentPacketSize)
@@ -121,55 +92,22 @@ bool Network::Client::Frame()
 		if (m_use_fd.revents & POLLWRNORM) //If normal data can be written without blocking
 		{
 			PacketManager& pm = m_connection.pm_outgoing;
+			int flag;
 			while (pm.HasPendingPackets())
 			{
 				if (pm.m_currentTask == PacketTask::ProcessPacketSize) //Sending packet size
 				{
-					pm.currentPacketSize = (uint16_t)pm.GetCurrentPacket()->m_buffer.size();
-					uint16_t bigEndianPacketSize = htons(pm.currentPacketSize);
-					int bytesSent = send(
-						m_use_fd.fd,
-						(char*)(&bigEndianPacketSize) + pm.currentPacketExtractionOffset,
-						sizeof(uint16_t) - pm.currentPacketExtractionOffset,
-						0);
-					if (bytesSent > 0)
-					{
-						pm.currentPacketExtractionOffset += bytesSent;
-					}
-
-					if (pm.currentPacketExtractionOffset == sizeof(uint16_t)) //If full packet size was sent
-					{
-						pm.currentPacketExtractionOffset = 0;
-						pm.m_currentTask = PacketTask::ProcessPacketContents;
-					}
-					else //If full packet size was not sent, break out of the loop for sending outgoing packets for this connection
-						//- we'll have to try again next time we are able to write normal data without blocking
-					{
+					flag = 0;
+					SendSizeData(pm, m_use_fd, flag);
+					if (flag == 1)
 						break;
-					}
 				}
 				else //Sending packet contents
 				{
-					uint8_t* bufferPtr = &pm.GetCurrentPacket()->m_buffer[0];
-					int bytesSent = send(m_use_fd.fd,
-						(char*)(bufferPtr)+pm.currentPacketExtractionOffset,
-						pm.currentPacketSize - pm.currentPacketExtractionOffset,
-						0);
-					if (bytesSent > 0)
-					{
-						pm.currentPacketExtractionOffset += bytesSent;
-					}
-
-					if (pm.currentPacketExtractionOffset == pm.currentPacketSize) //If full packet contents have been sent
-					{
-						pm.currentPacketExtractionOffset = 0;
-						pm.m_currentTask = PacketTask::ProcessPacketSize;
-						pm.Pop(); //Remove packet from queue after finished processing
-					}
-					else
-					{
+					flag = 0;
+					SendSizeData(pm, m_use_fd, flag);
+					if (flag == 1)
 						break;
-					}
 				}
 			}
 			if (!m_connection.pm_outgoing.HasPendingPackets())
@@ -190,6 +128,7 @@ bool Network::Client::Frame()
 	}
 	return true;
 }
+
 
 void Network::Client::Send(std::shared_ptr<Packet> packet)
 {
@@ -222,7 +161,7 @@ void Network::Client::OnDisconnect(std::string reason)
 	std::cout << "Lost connection. Reason: " << reason << ".\n";
 }
 
-void Network::Client::CloseConnection(std::string reason)
+void Network::Client::CloseConnection(std::string&& reason)
 {
 	OnDisconnect(reason);
 	m_master_fd.fd = 0;

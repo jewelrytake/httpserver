@@ -164,6 +164,7 @@
     <ClCompile Include="network\PackageManagerTest.cpp" />
     <ClCompile Include="network\Network.cpp" />
     <ClCompile Include="network\PacketTest.cpp" />
+    <ClCompile Include="network\SercerTest.cpp" />
     <ClCompile Include="network\SocketTest.cpp" />
     <ClCompile Include="network\TCPConnectionTest.cpp" />
     <ClCompile Include="uri\UriTest.cpp" />

@@ -15,7 +15,7 @@ namespace Network
 		virtual void OnConnect();
 		virtual void OnConnectFail();
 		virtual void OnDisconnect(std::string reason);
-		void CloseConnection(std::string reason);
+		void CloseConnection(std::string&& reason);
 		TCPConnection m_connection;
 
 	private:
@@ -23,5 +23,6 @@ namespace Network
 		WSAPOLLFD m_master_fd{};
 		WSAPOLLFD m_use_fd{};
 	};
+
 
 }
