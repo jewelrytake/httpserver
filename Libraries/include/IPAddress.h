@@ -23,6 +23,7 @@ namespace Network
 		sockaddr_in GetIPv4Address() const;
 		sockaddr_in6 GetIPv6Address() const;
 		friend bool set_address(const char* ip, Network::IPAddress& outObject);
+		friend bool operator==(const IPAddress& lhs, const IPAddress& rhs);
 	private:
 		std::string m_domain;
 		std::string m_address;

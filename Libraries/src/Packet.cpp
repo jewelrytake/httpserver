@@ -3,6 +3,24 @@
 #include <iostream>
 #include <NetworkUtility.h>
 
+struct PacketHash {
+	std::size_t operator()(Network::Packet p) const
+	{
+		std::hash<int> hashVal1;
+		return hashVal1(p.m_extractionOffset);
+	}
+};
+
+bool Network::operator==(const Packet& lhs, const Packet& rhs)
+{
+	return lhs.m_buffer == rhs.m_buffer && lhs.m_extractionOffset == rhs.m_extractionOffset;
+}
+
+//bool Network::Packet::operator==(const Packet& packet) const
+//{
+//	return m_buffer == packet.m_buffer && m_extractionOffset == packet.m_extractionOffset;
+//}
+
 Network::Packet::Packet(PacketType packetType)
 {
 	Clear();
@@ -105,7 +123,6 @@ Network::Packet& Network::Packet::operator>>(std::vector< uint8_t >& data)
 	return *this;
 }
 
-
 Network::Packet& Network::Packet::operator << (const std::vector< uint32_t >& data)
 {
 	*this << (uint32_t)data.size();
@@ -114,10 +131,8 @@ Network::Packet& Network::Packet::operator << (const std::vector< uint32_t >& da
 }
 Network::Packet& Network::Packet::operator >> (std::vector < uint32_t >& data)
 {
-	//clear old data
 	data.clear();
 	uint32_t size = 0;
-	//retrieve string size from Packet& Packet::operator>>(uint32_t& data)
 	*this >> size;
 	if ((m_extractionOffset + size) > m_buffer.size())
 		std::cerr << "[Packet::operator >>(std::string &)] - Extraction offset exceeded buffer size.\n";
@@ -133,10 +148,8 @@ Network::Packet& Network::Packet::operator >> (std::vector < uint32_t >& data)
 			m_buffer[m_extractionOffset + 3]
 		};
 		data[i] = ComposeInt_32(tmp);
-		
 		m_extractionOffset += sizeof(uint32_t);
 	}
-	
 	return *this;
 }
 

@@ -192,3 +192,22 @@ bool Network::TCPSocket::IsBlocking()
 {
 	return m_isBlocking;
 }
+struct TCPSocketHash {
+	std::size_t operator()(Network::TCPSocket p) const
+	{
+		std::hash<int> intVal;
+		std::hash<uint16_t> uint16_tVal;
+		std::hash<bool> boolVal;
+		return intVal(p.GetHandle()) ^ uint16_tVal((uint16_t)p.GetIPVersion()) ^ intVal(p.GetProtocol()) ^ intVal(p.GetType()) ^ boolVal(p.IsBlocking());
+	}
+};
+
+
+bool Network::operator==(const TCPSocket& lhs, const TCPSocket& rhs)
+{
+	return lhs.m_handle == rhs.m_handle &&
+		lhs.m_ipVersion == rhs.m_ipVersion &&
+		lhs.m_isBlocking == rhs.m_isBlocking &&
+		lhs.m_protocol == rhs.m_protocol &&
+		lhs.m_type == rhs.m_type;
+}

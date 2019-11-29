@@ -23,6 +23,7 @@ namespace Network
 		int GetProtocol();
 		bool SetBlocking(bool isBlocking);
 		bool IsBlocking();
+		friend bool operator==(const TCPSocket& lhs, const TCPSocket& rhs);
 	private:
 		IPVersion m_ipVersion;
 		int m_type;

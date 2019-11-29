@@ -123,3 +123,21 @@ bool Network::set_address(const char* ip, Network::IPAddress& outObject)
 	}
 	return false;
 }
+
+struct IPAddressHash {
+	std::size_t operator()(Network::IPAddress p) const
+	{
+		std::hash<uint16_t> uint16Hash;
+		std::hash<std::string> stringHash;
+		return stringHash(p.GetAddress()) ^ stringHash(p.GetDomain()) ^ uint16Hash(p.GetPort()) ^ uint16Hash((uint16_t)p.GetVersion());
+	}
+};
+
+bool Network::operator==(const IPAddress& lhs, const IPAddress& rhs)
+{
+	return lhs.m_address == rhs.m_address &&
+		lhs.m_domain == rhs.m_domain &&
+		lhs.m_stream == rhs.m_stream &&
+		lhs.m_port == rhs.m_port &&
+		lhs.m_version == rhs.m_version;
+}

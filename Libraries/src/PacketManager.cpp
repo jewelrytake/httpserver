@@ -1,5 +1,21 @@
 #include <PacketManager.h>
 
+struct PacketManagerHash {
+	std::size_t operator()(Network::PacketManager p) const
+	{
+		std::hash<int> hashVal1;
+		std::hash<uint16_t> hashVal2;
+		return hashVal1(p.currentPacketExtractionOffset) ^ hashVal1(p.currentPacketSize) ^ hashVal2((uint16_t)p.m_currentTask);
+	}
+};
+
+bool Network::operator==(const PacketManager& lhs, const PacketManager& rhs)
+{
+	return lhs.currentPacketExtractionOffset == rhs.currentPacketExtractionOffset 
+		&& lhs.currentPacketSize == rhs.currentPacketSize && lhs.m_currentTask == rhs.m_currentTask;
+}
+
+
 void Network::PacketManager::Clear()
 {
 	m_packets = std::queue<std::shared_ptr<Packet>>{}; // Clear out packet queue
@@ -7,7 +23,7 @@ void Network::PacketManager::Clear()
 
 bool Network::PacketManager::HasPendingPackets()
 {
-	return (!m_packets.empty());
+	return !m_packets.empty();
 }
 
 void Network::PacketManager::Append(std::shared_ptr<Packet> p)

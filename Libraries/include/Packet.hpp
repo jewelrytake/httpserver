@@ -20,6 +20,8 @@ namespace Network
 		Packet& operator >> (std::vector < uint32_t >& data);
 		uint32_t m_extractionOffset = 0; //where to read
 		std::vector<uint8_t> m_buffer;
+		//bool operator==(const Packet& rhs) const;
+		friend bool operator==(const Packet& lhs, const Packet& rhs);
 	private:
 		void AssignPacketType(PacketType packetType);
 		void Clear();
