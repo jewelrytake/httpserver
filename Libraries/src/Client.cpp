@@ -94,7 +94,7 @@ bool Network::Client::Frame()
 		if (m_use_fd.revents & POLLWRNORM) //If normal data can be written without blocking
 		{
 			PacketManager& pm = m_connection.pm_outgoing;
-			int flag;
+			uint8_t flag;
 			while (pm.HasPendingPackets())
 			{
 				if (pm.m_currentTask == PacketTask::ProcessPacketSize) //Sending packet size

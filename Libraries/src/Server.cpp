@@ -17,9 +17,7 @@ namespace Network
 			{
 				//TODO: use SetSocketStatus
 				WSAPOLLFD listeningSocketFD = {};//WSAPOLLFD structure stores socket information used by the WSAPoll function.
-				listeningSocketFD.fd = m_listeningSocket.GetHandle(); //The identifier of the socket for which to find status.
-				listeningSocketFD.events = POLLRDNORM; //A set of flags indicating the type of status being requested.
-				listeningSocketFD.revents = 0; //the results of the status query.
+				SetSocketStatus(m_listeningSocket, listeningSocketFD);
 				m_master_fd.emplace_back(listeningSocketFD);//very first element will be listeningSocket
 				std::cout << "Socket successfully listening.\n";
 				return true;
@@ -81,7 +79,6 @@ namespace Network
 			{
 				int connectionIndex = i - 1;
 				//Retrieve socket connected to server 
-				TCPConnection& connection = m_connections[connectionIndex];
 				std::string status;
 				ReventsError(m_use_fd[i], status);
 				if (!status.empty())
@@ -92,6 +89,7 @@ namespace Network
 #pragma endregion End of ERROR_CHECKING
 
 #pragma region Read data from a client
+				TCPConnection& connection = m_connections[connectionIndex];
 				if (m_use_fd[i].revents & POLLRDNORM) //If normal data can be read without blocking from a client
 				{
 					int bytesReceived = ReceiveData(connection, m_use_fd[i]);
@@ -128,7 +126,7 @@ namespace Network
 #pragma region Send data to client
 				if (m_use_fd[i].revents & POLLWRNORM)
 				{
-					int flag;
+					uint8_t flag;
 					PacketManager& pm = connection.pm_outgoing;
 					while (pm.HasPendingPackets())
 					{

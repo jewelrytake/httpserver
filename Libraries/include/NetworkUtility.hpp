@@ -9,8 +9,8 @@ int ReceiveData(Network::TCPConnection& connection, WSAPOLLFD& use_fd);
 void ReceivedBytesError(int receivedBytes, std::string& status);
 void ProcessPacketSize(Network::TCPConnection& connection, uint8_t& conditionFlag);
 void ProcessPacketContent(Network::TCPConnection& connection);
-void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag);
-void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag);
+void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& flag);
+void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& flag);
 
 
 

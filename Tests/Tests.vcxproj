@@ -73,25 +73,25 @@
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\tests\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\tests\</IntDir>
     <LibraryPath>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Libraries\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest-master\googletest\include\;C:\smooth\projects\googletest-master\googletest;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest\googletest\include\;C:\smooth\projects\googletest\googletest;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\tests\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\tests\</IntDir>
     <LibraryPath>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Libraries\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest-master\googletest\include\;C:\smooth\projects\googletest-master\googletest;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest\googletest\include\;C:\smooth\projects\googletest\googletest;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\tests\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\tests\</IntDir>
     <LibraryPath>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Libraries\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest-master\googletest\include\;C:\smooth\projects\googletest-master\googletest;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest\googletest\include\;C:\smooth\projects\googletest\googletest;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\tests\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\tests\</IntDir>
     <LibraryPath>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Libraries\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest-master\googletest\include\;C:\smooth\projects\googletest-master\googletest;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include\;C:\smooth\projects\googletest\googletest\include\;C:\smooth\projects\googletest\googletest;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -158,8 +158,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\googletest-master\googletest\src\gtest-all.cc" />
-    <ClCompile Include="..\..\googletest-master\googletest\src\gtest_main.cc" />
+    <ClCompile Include="..\..\googletest\googletest\src\gtest-all.cc" />
+    <ClCompile Include="..\..\googletest\googletest\src\gtest_main.cc" />
     <ClCompile Include="network\IPTest.cpp" />
     <ClCompile Include="network\NetworkUtilityTest.cpp" />
     <ClCompile Include="network\PackageManagerTest.cpp" />

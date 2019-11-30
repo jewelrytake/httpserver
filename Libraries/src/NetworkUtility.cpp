@@ -92,22 +92,22 @@ int ReceiveData(Network::TCPConnection& connection, WSAPOLLFD& use_fd)
 	{
 		bytesReceived = recv(
 			use_fd.fd,
-			(char*)&connection.pm_incoming.currentPacketSize + connection.pm_incoming.currentPacketExtractionOffset,
-			sizeof(uint16_t) - connection.pm_incoming.currentPacketExtractionOffset,
+			(char*)(int)(&connection.pm_incoming.currentPacketSize + connection.pm_incoming.currentPacketExtractionOffset),
+			sizeof(uint16_t) - (int)connection.pm_incoming.currentPacketExtractionOffset,
 			0);
 	}
 	else //Process Packet Contents
 	{
 		bytesReceived = recv(
 			use_fd.fd,
-			(char*)&connection.m_buffer + connection.pm_incoming.currentPacketExtractionOffset,
-			connection.pm_incoming.currentPacketSize - connection.pm_incoming.currentPacketExtractionOffset,
+			(char*)(int)(&connection.m_buffer + connection.pm_incoming.currentPacketExtractionOffset),
+			int (connection.pm_incoming.currentPacketSize - connection.pm_incoming.currentPacketExtractionOffset),
 			0);
 	}
 	return bytesReceived;
 }
 
-void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag)
+void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& flag)
 {
 	pm.currentPacketSize = (uint16_t)pm.GetCurrentPacket()->m_buffer.size();
 	uint16_t netPacketSize = htons(pm.currentPacketSize);
@@ -134,11 +134,11 @@ void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag)
 	}
 }
 
-void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag)
+void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& flag)
 {
 	char* bufferPtr = &pm.GetCurrentPacket()->m_buffer[0];
 	int bytesSent = send(use_fd.fd,
-		(char*)(bufferPtr)+pm.currentPacketExtractionOffset,
+		(char*)(bufferPtr) + pm.currentPacketExtractionOffset,
 		pm.currentPacketSize - pm.currentPacketExtractionOffset,
 		0);
 	if (bytesSent > 0)

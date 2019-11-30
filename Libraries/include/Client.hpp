@@ -9,8 +9,6 @@ namespace Network
 		bool Connect(IPAddress ip);
 		bool IsConnected();
 		bool Frame();
-		//void Send(std::shared_ptr<Packet> packet);
-		//void Receive(std::shared_ptr<Packet> packet);
 	protected:
 		virtual bool ProcessPacket(std::shared_ptr<Packet> packet);
 		virtual void OnConnect();

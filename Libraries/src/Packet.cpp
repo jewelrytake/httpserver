@@ -168,9 +168,9 @@ Network::Packet& Network::Packet::operator >> (std::vector < uint32_t >& data)
 		unsigned char tmp[4] = 
 		{
 			m_buffer[m_extractionOffset],
-			m_buffer[m_extractionOffset + 1],
-			m_buffer[m_extractionOffset + 2],
-			m_buffer[m_extractionOffset + 3]
+			m_buffer[m_extractionOffset + (uint32_t)1],
+			m_buffer[m_extractionOffset + (uint32_t)2],
+			m_buffer[m_extractionOffset + (uint32_t)3]
 		};
 		data[i] = ComposeInt_32(tmp);
 		m_extractionOffset += sizeof(uint32_t);

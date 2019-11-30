@@ -4,7 +4,7 @@ struct PacketManagerHash
 {
 	std::size_t operator()(Network::PacketManager p) const
 	{
-		std::hash<int> hashVal1;
+		std::hash<size_t> hashVal1;
 		std::hash<uint16_t> hashVal2;
 		return hashVal1(p.currentPacketExtractionOffset) ^ hashVal1(p.currentPacketSize) ^ hashVal2((uint16_t)p.m_currentTask);
 	}
