@@ -1,7 +1,7 @@
 #include <Packet.hpp>
-#include <Constants.h>
+#include <Constants.hpp>
 #include <iostream>
-#include <NetworkUtility.h>
+#include <NetworkUtility.hpp>
 
 struct PacketHash {
 	std::size_t operator()(Network::Packet p) const
@@ -16,11 +16,6 @@ bool Network::operator==(const Packet& lhs, const Packet& rhs)
 	return lhs.m_buffer == rhs.m_buffer && lhs.m_extractionOffset == rhs.m_extractionOffset;
 }
 
-//bool Network::Packet::operator==(const Packet& packet) const
-//{
-//	return m_buffer == packet.m_buffer && m_extractionOffset == packet.m_extractionOffset;
-//}
-
 Network::Packet::Packet(PacketType packetType)
 {
 	Clear();
@@ -31,6 +26,8 @@ Network::PacketType Network::Packet::GetPacketType()
 {
 	PacketType* packet_ptr = reinterpret_cast<PacketType*>(&m_buffer[0]);
 	return static_cast<PacketType>(ntohs((uint16_t)*packet_ptr));
+	PacketType* packetTypePtr = reinterpret_cast<PacketType*>(&m_buffer[0]);
+	return static_cast<PacketType>(ntohs((uint16_t)*packetTypePtr));
 }
 
 void Network::Packet::AssignPacketType(PacketType packetType)
@@ -95,8 +92,36 @@ Network::Packet& Network::Packet::operator>>(uint32_t& data)
 	m_extractionOffset += sizeof(uint32_t);
 	return *this;
 }
+
+Network::Packet& Network::Packet::operator<<(const std::string& data)
+{
+	//using Packet& Packet::operator<<(uint32_t data)
+	*this << (uint32_t)data.size();
+	Append(data.data(), data.size());
+	return *this;
+}
+Network::Packet& Network::Packet::operator>>(std::string& data)
+{
+	//clear old data
+	data.clear();
+	uint32_t stringSize = 0;
+	//retrieve string size from Packet& Packet::operator>>(uint32_t& data)
+	*this >> stringSize;
+	if ((m_extractionOffset + stringSize) > m_buffer.size())
+	{
+		std::cerr << "\nOffset exceeds max buffer size.\n";
+	}
+	data.resize(stringSize);
+	for (uint32_t i = 0; i < stringSize; i++)
+	{
+		data[i] = m_buffer[i + m_extractionOffset];
+	}
+	m_extractionOffset += stringSize;
+	return *this;
+}
+
 //write to Packet 
-Network::Packet& Network::Packet::operator<<(const std::vector<uint8_t>& data)
+Network::Packet& Network::Packet::operator<<(const std::vector<char>& data)
 {
 	//using Packet& Packet::operator<<(uint32_t data)
 	*this << (uint32_t)data.size();
@@ -104,7 +129,7 @@ Network::Packet& Network::Packet::operator<<(const std::vector<uint8_t>& data)
 	return *this;
 }
 
-Network::Packet& Network::Packet::operator>>(std::vector< uint8_t >& data)
+Network::Packet& Network::Packet::operator>>(std::vector< char >& data)
 {
 	//clear old data
 	data.clear();

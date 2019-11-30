@@ -1,12 +1,12 @@
 #pragma once
-#include "TCPConnection.h"
+#include "TCPConnection.hpp"
 
 namespace Network
 {
 	struct Server
 	{
 		bool Start(IPAddress ip);
-		void Frame();		
+		void Frame();
 	protected:
 		virtual void OnConnect(TCPConnection& connected);
 		virtual void OnDisconnect(TCPConnection& connected, std::string&& reason);

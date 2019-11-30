@@ -1,6 +1,7 @@
-#include <PacketManager.h>
+#include <PacketManager.hpp>
 
-struct PacketManagerHash {
+struct PacketManagerHash
+{
 	std::size_t operator()(Network::PacketManager p) const
 	{
 		std::hash<int> hashVal1;
@@ -23,7 +24,7 @@ void Network::PacketManager::Clear()
 
 bool Network::PacketManager::HasPendingPackets()
 {
-	return !m_packets.empty();
+	return !(m_packets.empty());
 }
 
 void Network::PacketManager::Append(std::shared_ptr<Packet> p)

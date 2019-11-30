@@ -1,4 +1,4 @@
-#include <Initializer.h>
+#include <Initializer.hpp>
 #include <gtest/gtest.h>
 
 TEST(NetworkTest, Initialize)

@@ -1,7 +1,5 @@
-#include <NetworkUtility.h>
+#include <NetworkUtility.hpp>
 #include <iostream>
-
-
 
 void DecomposeInt_32(unsigned char* buf, int32_t val)
 {
@@ -138,7 +136,7 @@ void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag)
 
 void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag)
 {
-	uint8_t* bufferPtr = &pm.GetCurrentPacket()->m_buffer[0];
+	char* bufferPtr = &pm.GetCurrentPacket()->m_buffer[0];
 	int bytesSent = send(use_fd.fd,
 		(char*)(bufferPtr)+pm.currentPacketExtractionOffset,
 		pm.currentPacketSize - pm.currentPacketExtractionOffset,
@@ -147,7 +145,6 @@ void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, int& flag)
 	{
 		pm.currentPacketExtractionOffset += bytesSent;
 	}
-
 	if (pm.currentPacketExtractionOffset == pm.currentPacketSize) //If full packet contents have been sent
 	{
 		pm.currentPacketExtractionOffset = 0;

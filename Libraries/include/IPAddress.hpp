@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <IPVersion.h>
+#include <IPVersion.hpp>
 #include <cstdint>
 #include <vector>
 #include <WS2tcpip.h>

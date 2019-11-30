@@ -43,10 +43,10 @@ TEST(PacketTest, CheckByteVectorExtractionOffset)
 {
 	Packet packet(PacketType::PT_Test);
 	ASSERT_EQ(packet.m_extractionOffset, 2);
-	std::vector< uint8_t > in1 = { 10, 20, 30, 40, 50, 231, 131, 3 };
-	std::vector< uint8_t > in2 = { 1, 100, 5, 32, 2, 1, 10, 32 };
-	std::vector< uint8_t > out1;
-	std::vector< uint8_t > out2;
+	std::vector< char > in1 = { 10, 20, 30, 40, 50, 100, 120, 3 };
+	std::vector< char > in2 = { 1, 100, 5, 32, 2, 1, 10, 32 };
+	std::vector< char > out1;
+	std::vector< char > out2;
 
 	packet << in1;
 	ASSERT_EQ(packet.m_extractionOffset, 2);
@@ -85,10 +85,10 @@ TEST(PacketTest, CheckIntegerVectorExtractionOffset)
 TEST(PacketTest, PacketInsertExtractData)
 {
 	Packet packet(PacketType::PT_Test);
-	std::vector< uint8_t > testBuffer1 = { 10, 20, 30, 40, 50, 231, 131, 3 };
-	std::vector< uint8_t > testBuffer2 = { 1, 100, 5, 32, 2, 1, 10, 32 };
-	std::vector< uint8_t > outBuffer;
-	std::vector< uint8_t > outBuffer2;
+	std::vector< char > testBuffer1 = { 10, 20, 30, 40, 50, 100, 120, 3 };
+	std::vector< char > testBuffer2 = { 1, 100, 5, 32, 2, 1, 10, 32 };
+	std::vector< char > outBuffer;
+	std::vector< char > outBuffer2;
 	packet << testBuffer1;
 	packet << testBuffer2;
 

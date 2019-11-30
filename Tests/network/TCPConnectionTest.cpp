@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <TCPConnection.h>
-#include <Initializer.h>
+#include <TCPConnection.hpp>
+#include <Initializer.hpp>
 
 using namespace Network;
 

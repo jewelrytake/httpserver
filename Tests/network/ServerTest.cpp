@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <Server.h>
-#include <Initializer.h>
+#include <Server.hpp>
+#include <Initializer.hpp>
 
 using namespace Network;
 

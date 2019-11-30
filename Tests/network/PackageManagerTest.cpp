@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <PacketManager.h>
+#include <PacketManager.hpp>
 
 using namespace Network;
 

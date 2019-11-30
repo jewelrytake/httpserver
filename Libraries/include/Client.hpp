@@ -1,15 +1,16 @@
 #pragma once
-#include "TCPConnection.h"
+#include "TCPConnection.hpp"
 
 namespace Network
 {
 	struct Client
 	{
+		Client();
 		bool Connect(IPAddress ip);
 		bool IsConnected();
 		bool Frame();
-		void Send(std::shared_ptr<Packet> packet);
-		void Receive(std::shared_ptr<Packet> packet);
+		//void Send(std::shared_ptr<Packet> packet);
+		//void Receive(std::shared_ptr<Packet> packet);
 	protected:
 		virtual bool ProcessPacket(std::shared_ptr<Packet> packet);
 		virtual void OnConnect();
@@ -23,6 +24,4 @@ namespace Network
 		WSAPOLLFD m_master_fd{};
 		WSAPOLLFD m_use_fd{};
 	};
-
-
 }

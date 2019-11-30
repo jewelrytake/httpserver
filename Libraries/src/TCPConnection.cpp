@@ -1,5 +1,5 @@
-#include <TCPConnection.h>
-#include <IPAddress.h>
+#include <TCPConnection.hpp>
+#include <IPAddress.hpp>
 
 Network::TCPConnection::TCPConnection(TCPSocket socket, Network::IPAddress ip)
 	: m_socket(socket), m_ip(ip)

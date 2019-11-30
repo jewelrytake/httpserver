@@ -1,6 +1,6 @@
 #pragma once
 #include <WinSock2.h>
-#include <IPAddress.h>
+#include <IPAddress.hpp>
 #include <Packet.hpp>
 
 namespace Network

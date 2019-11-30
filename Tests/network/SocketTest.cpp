@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <TCPSocket.h>
-#include <Initializer.h>
+#include <TCPSocket.hpp>
+#include <Initializer.hpp>
 
 using namespace Network;
 

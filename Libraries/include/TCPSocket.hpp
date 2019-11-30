@@ -1,11 +1,11 @@
 #pragma once
 #include <WinSock2.h>
-#include <IPAddress.h>
+#include <IPAddress.hpp>
 #include <Packet.hpp>
 
 namespace Network
 {
-	struct TCPSocket 
+	struct TCPSocket
 	{
 		//API
 		TCPSocket(IPVersion version = IPVersion::IPv4, int type = SOCK_STREAM, int protocol = IPPROTO_TCP, SOCKET handle = INVALID_SOCKET);

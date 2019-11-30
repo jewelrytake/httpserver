@@ -1,7 +1,7 @@
-#include <Initializer.h>
-#include <Server.h>
+#include <Initializer.hpp>
+#include <Server.hpp>
 #include <iostream>
-#include "NetworkUtility.h"
+#include "NetworkUtility.hpp"
 
 namespace Network
 {
@@ -15,6 +15,7 @@ namespace Network
 			std::cout << "Socket successfully created.\n";
 			if (m_listeningSocket.Listen(ip))
 			{
+				//TODO: use SetSocketStatus
 				WSAPOLLFD listeningSocketFD = {};//WSAPOLLFD structure stores socket information used by the WSAPoll function.
 				listeningSocketFD.fd = m_listeningSocket.GetHandle(); //The identifier of the socket for which to find status.
 				listeningSocketFD.events = POLLRDNORM; //A set of flags indicating the type of status being requested.
@@ -141,7 +142,7 @@ namespace Network
 						else
 						{
 							flag = 0;
-							SendSizeData(pm, m_use_fd[i], flag);
+							SendContentData(pm, m_use_fd[i], flag);
 							if (flag == 1)
 								break;
 						}

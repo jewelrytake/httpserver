@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <Server.h>
-#include <Initializer.h>
-#include <NetworkUtility.h>
+#include <Server.hpp>
+#include <Initializer.hpp>
+#include <NetworkUtility.hpp>
 
 using namespace Network;
 
@@ -40,8 +40,6 @@ TEST(NetworkUtilityTest, SetSocketStatus)
 TEST(NetworkUtilityTest, ReventsError)
 {
 	Initialize();
-	//Server server;
-	//ASSERT_TRUE(server.Start(IPAddress("127.0.0.1", 1444)));
 	WSAPOLLFD fd;
 	TCPSocket sock;
 	sock.Create();
@@ -60,27 +58,3 @@ TEST(NetworkUtilityTest, ReventsError)
 	ASSERT_EQ(status, "POLLNVAL");
 	Shutdown();
 }
-
-//TEST(NetworkUtilityTest, ReceiveData)
-//{
-//	Initialize();
-//	WSAPOLLFD fd;
-//	TCPSocket sock;
-//	TCPSocket accepted;
-//	TCPSocket client;
-//	IPAddress ip("127.0.0.1", 7897);
-//	IPAddress acceptedIp;
-//	sock.Create();
-//	client.Create();
-//	sock.Listen(ip);
-//	client.Connect(ip);
-//	Sleep(50);
-//	sock.Accept(accepted, &acceptedIp);
-//	SetSocketStatus(sock, fd);
-//	TCPConnection tcp(accepted, acceptedIp);
-//	ASSERT_EQ(ReceiveData(tcp, fd), 0);
-//
-//	Shutdown();
-//}
-
-

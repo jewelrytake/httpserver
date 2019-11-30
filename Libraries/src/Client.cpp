@@ -1,6 +1,8 @@
-#include <Client.h>
+#include <Client.hpp>
 #include <iostream>
-#include "NetworkUtility.h"
+#include <NetworkUtility.hpp>
+
+Network::Client::Client() = default;
 
 bool Network::Client::Connect(Network::IPAddress ip)
 {
@@ -105,7 +107,7 @@ bool Network::Client::Frame()
 				else //Sending packet contents
 				{
 					flag = 0;
-					SendSizeData(pm, m_use_fd, flag);
+					SendContentData(pm, m_use_fd, flag);
 					if (flag == 1)
 						break;
 				}
@@ -127,17 +129,6 @@ bool Network::Client::Frame()
 		m_connection.pm_incoming.Pop();
 	}
 	return true;
-}
-
-
-void Network::Client::Send(std::shared_ptr<Packet> packet)
-{
-	m_connection.pm_outgoing.Append(packet);
-}
-
-void Network::Client::Receive(std::shared_ptr<Packet> packet)
-{
-	
 }
 
 bool Network::Client::ProcessPacket(std::shared_ptr<Packet> packet)

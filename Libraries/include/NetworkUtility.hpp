@@ -1,6 +1,5 @@
 #pragma once
-#include "IncludeMe.h"
-#include <Server.h>
+#include "Include.hpp"
 
 void DecomposeInt_32(unsigned char* buf, int32_t val);
 int32_t ComposeInt_32(unsigned char* buf);
