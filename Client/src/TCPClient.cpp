@@ -7,11 +7,20 @@ bool TCPClient::ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> 
 {
 	switch (packet->GetPacketType())
 	{
-	case PacketType::PT_ChatMessage:
+	case PacketType::PT_Greetings:
 	{
 		std::string chatmessage;
 		*packet >> chatmessage;
-		std::cout << "Chat Message: " << chatmessage << '\n';
+		std::cout << "Greetings: " << chatmessage << '\n';
+		break;
+	}
+	case PacketType::PT_ChatMessage:
+	{
+		std::string chatmessage;
+		std::string user;
+		*packet >> chatmessage;
+		*packet >> user;
+		std::cout << "From " << user << ": " << chatmessage << '\n';
 		break;
 	}
 	case PacketType::PT_IntegerArray:
@@ -38,7 +47,7 @@ bool TCPClient::ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> 
 void TCPClient::OnConnect()
 {
 	std::cout << "Successfully connected to the server!" << '\n';
-	std::shared_ptr<Packet> helloPacket = std::make_shared<Packet>(PacketType::PT_ChatMessage);
+	std::shared_ptr<Packet> helloPacket = std::make_shared<Packet>(PacketType::PT_Greetings);
 	*helloPacket << std::string("Hello from the client!");
 	m_connection.pm_outgoing.Append(helloPacket);
 }

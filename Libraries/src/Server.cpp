@@ -171,6 +171,7 @@ namespace Network
 		{
 			if (&connection == &connected)
 				continue;
+			*packet << connection.ToString();
 			connection.pm_outgoing.Append(packet);
 		}
 	}

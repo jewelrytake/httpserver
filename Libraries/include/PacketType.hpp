@@ -8,6 +8,7 @@ namespace Network
 		PT_Invalid,
 		PT_IntegerArray,
 		PT_ChatMessage,
-		PT_Test
+		PT_Test,
+		PT_Greetings
 	};
 }

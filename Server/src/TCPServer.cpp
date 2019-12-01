@@ -6,11 +6,11 @@ using namespace Network;
 void TCPServer::OnConnect(TCPConnection& connected)
 {
 	std::cout << connected.ToString() << " - New connection accepted.\n";
-	std::shared_ptr<Packet> welcomeMessagePacket = std::make_shared<Packet>(PacketType::PT_ChatMessage);
+	std::shared_ptr<Packet> welcomeMessagePacket = std::make_shared<Packet>(PacketType::PT_Greetings);
 	*welcomeMessagePacket << "Welcome";
 	//Send to the client
 	connected.pm_outgoing.Append(welcomeMessagePacket);
-	std::shared_ptr<Packet> newUserMessagePacket = std::make_shared<Packet>(PacketType::PT_ChatMessage);
+	std::shared_ptr<Packet> newUserMessagePacket = std::make_shared<Packet>(PacketType::PT_Greetings);
 	*newUserMessagePacket << "New user connected!";
 	for (auto& connection : m_connections)
 	{
@@ -23,7 +23,7 @@ void TCPServer::OnConnect(TCPConnection& connected)
 void TCPServer::OnDisconnect(TCPConnection& connected, std::string&& reason)
 {
 	std::cout << "[" << reason << "] Connection lost: " << connected.ToString() << ".\n";
-	std::shared_ptr<Packet> connectionLostPacket = std::make_shared<Packet>(PacketType::PT_ChatMessage);
+	std::shared_ptr<Packet> connectionLostPacket = std::make_shared<Packet>(PacketType::PT_Greetings);
 	*connectionLostPacket << "A user disconnected!";
 	for (auto& connection : m_connections)
 	{
@@ -39,10 +39,17 @@ bool TCPServer::ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> 
 	{
 	case PacketType::PT_ChatMessage:
 	{
-		std::string chatmessage;
 		Server::ShareMessage(connected, packet);
+		std::string chatmessage;
 		*packet >> chatmessage;
-		std::cout  << "Chat message: " << chatmessage << '\n';
+		std::cout  << "Chat message from " << connected.ToString() << ": " << chatmessage << '\n';
+		break;
+	}
+	case PacketType::PT_Greetings:
+	{
+		std::string chatmessage;
+		*packet >> chatmessage;
+		std::cout  << "Greetings: " << chatmessage << '\n';
 		break;
 	}
 	case PacketType::PT_IntegerArray:
