@@ -155,7 +155,7 @@ namespace Network
 			while (m_connections[i].pm_incoming.HasPendingPackets())
 			{
 				std::shared_ptr<Packet> frontPacket = m_connections[i].pm_incoming.GetCurrentPacket();
-				if (!ProcessPacket(frontPacket))
+				if (!ProcessPacket(m_connections[i], frontPacket))
 				{
 					CloseConnection(i, "Failed to process incoming packet.");
 					break;
@@ -164,7 +164,17 @@ namespace Network
 			}
 		}
 #pragma endregion End of process incoming packets
-	}	
+	}
+	void Server::ShareMessage(TCPConnection& connected, std::shared_ptr<Packet> packet)
+	{
+		for (auto& connection : m_connections)
+		{
+			if (&connection == &connected)
+				continue;
+			connection.pm_outgoing.Append(packet);
+		}
+	}
+
 	void Server::OnConnect(TCPConnection& newConnection)
 	{
 		std::cout << newConnection.ToString() << " - New connection accepted.\n";
@@ -185,7 +195,7 @@ namespace Network
 		m_connections.erase(m_connections.begin() + connectionIndex);
 	}
 
-	bool Server::ProcessPacket(std::shared_ptr<Packet> packet)
+	bool Server::ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet)
 	{
 		std::cout << "Packet received with size: " << packet->m_buffer.size() << '\n';
 		return true;

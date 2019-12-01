@@ -62,7 +62,7 @@ TEST(PacketTest, CheckIntegerVectorExtractionOffset)
 {
 	Packet packet(PacketType::PT_Test);
 	ASSERT_EQ(packet.m_extractionOffset, 2);
-	std::vector< uint32_t > in1 = { 2312419, 3213213, 45343, 1111, 2000, 300, 275, 300 };
+	std::vector< uint32_t > in1 = { 100, 90, 83, 30, 120, 73, 75, 10 };
 	std::vector< uint32_t > in2 = { 1, 100, 5, 32, 2, 1, 10, 32 };
 	std::vector< uint32_t > out1;
 	std::vector< uint32_t > out2;

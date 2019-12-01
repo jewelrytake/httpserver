@@ -23,7 +23,7 @@ int main()
 	{
 		SetConsoleCtrlHandler(CtrlHandler, TRUE);
 		Network::TCPServer server;
-		if (server.Start(Network::IPAddress("127.0.0.1", 6112)))
+		if (server.Start(Network::IPAddress("192.168.0.104", 8080)))
 		{
 			while (true)
 			{

@@ -6,7 +6,7 @@ namespace Network
 	struct TCPClient : public Network::Client
 	{
 	private:
-		bool ProcessPacket(std::shared_ptr<Network::Packet> packet) override;
+		bool ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet) override;
 		void OnConnect() override;
 	};
 }

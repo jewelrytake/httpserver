@@ -8,6 +8,6 @@ namespace Network
 	private:
 		void OnConnect(TCPConnection& connected) override;
 		void OnDisconnect(TCPConnection& connected, std::string&& reason) override;
-		bool ProcessPacket(std::shared_ptr<Packet> packet) override;
+		bool ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet) override;
 	};
 }

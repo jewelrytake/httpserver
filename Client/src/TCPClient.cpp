@@ -3,7 +3,7 @@
 
 using namespace Network;
 
-bool TCPClient::ProcessPacket(std::shared_ptr<Packet> packet)
+bool TCPClient::ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet)
 {
 	switch (packet->GetPacketType())
 	{

@@ -7,10 +7,11 @@ namespace Network
 	{
 		bool Start(IPAddress ip);
 		void Frame();
+		void ShareMessage(TCPConnection& connected, std::shared_ptr<Packet> packet);
 	protected:
 		virtual void OnConnect(TCPConnection& connected);
 		virtual void OnDisconnect(TCPConnection& connected, std::string&& reason);
-		virtual bool ProcessPacket(std::shared_ptr<Packet> packet);
+		virtual bool ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet);
 		void CloseConnection(int connectionIndex, std::string&& reason);
 		TCPSocket m_listeningSocket;
 		//vector of all the connections to server, including listening socket

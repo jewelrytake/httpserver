@@ -33,15 +33,16 @@ void TCPServer::OnDisconnect(TCPConnection& connected, std::string&& reason)
 	}
 }
 
-bool TCPServer::ProcessPacket(std::shared_ptr<Packet> packet)
+bool TCPServer::ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet)
 {
 	switch (packet->GetPacketType())
 	{
 	case PacketType::PT_ChatMessage:
 	{
 		std::string chatmessage;
+		Server::ShareMessage(connected, packet);
 		*packet >> chatmessage;
-		std::cout << "Chat Message: " << chatmessage << '\n';
+		std::cout  << "Chat message: " << chatmessage << '\n';
 		break;
 	}
 	case PacketType::PT_IntegerArray:

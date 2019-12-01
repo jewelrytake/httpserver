@@ -21,14 +21,20 @@ int main()
 	{
 		SetConsoleCtrlHandler(CtrlHandler, TRUE);
 		Network::TCPClient client;
-		//std::thread chat{ &Network::TCPClient::ChatFrame, client };
-		//chat.join();
-		if (client.Connect(Network::IPAddress("127.0.0.1", 6112)))
+		if (client.Connect(Network::IPAddress("192.168.0.104", 8080)))
 		{
+			std::thread th([&client]()
+				{
+					while (true)
+					{
+						client.ChatFrame();
+					}
+				});
+			th.detach();
 			while (client.IsConnected())
 			{
 				client.Frame();
-				client.ChatFrame();
+				
 			}
 		}
 	}

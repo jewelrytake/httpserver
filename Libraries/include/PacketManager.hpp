@@ -22,7 +22,9 @@ namespace Network
 		size_t currentPacketExtractionOffset = 0;
 		PacketTask m_currentTask = PacketTask::ProcessPacketSize;
 		friend bool operator==(const PacketManager& lhs, const PacketManager& rhs);
+		
 	private:
 		std::queue< std::shared_ptr< Packet > > m_packets;
+		
 	};
 }

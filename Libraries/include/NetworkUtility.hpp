@@ -11,7 +11,3 @@ bool ProcessPacketSize(Network::TCPConnection& connection);
 void ProcessPacketContent(Network::TCPConnection& connection);
 bool SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd);
 bool SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd);
-
-
-
-

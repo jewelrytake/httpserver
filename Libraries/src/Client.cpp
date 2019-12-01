@@ -85,10 +85,8 @@ bool Network::Client::Frame()
 						return false;
 					}
 				}
-				if (m_connection.pm_incoming.m_currentTask == Network::PacketTask::ProcessPacketContents)  //Processing packet contents
+				else //Processing packet contents
 				{
-					bytesReceived = ReceiveData(m_connection, m_use_fd);
-					m_connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
 					if (m_connection.pm_incoming.currentPacketExtractionOffset == m_connection.pm_incoming.currentPacketSize)
 					{
 						ProcessPacketContent(m_connection);
@@ -99,7 +97,6 @@ bool Network::Client::Frame()
 		if (m_use_fd.revents & POLLWRNORM) //If normal data can be written without blocking
 		{
 			PacketManager& pm = m_connection.pm_outgoing;
-			uint8_t flag;
 			while (pm.HasPendingPackets())
 			{
 				if (pm.m_currentTask == PacketTask::ProcessPacketSize) //Sending packet size
@@ -122,7 +119,8 @@ bool Network::Client::Frame()
 	while (m_connection.pm_incoming.HasPendingPackets())
 	{
 		std::shared_ptr<Packet> frontPacket = m_connection.pm_incoming.GetCurrentPacket();
-		if (!ProcessPacket(frontPacket))
+		std::shared_ptr<Packet> sender;
+		if (!ProcessPacket(m_connection, frontPacket))
 		{
 			CloseConnection("Failed to process incoming packet.");
 			return false;
@@ -141,7 +139,7 @@ void Network::Client::ChatFrame()
 	m_connection.pm_outgoing.Append(message);
 }
 
-bool Network::Client::ProcessPacket(std::shared_ptr<Packet> packet)
+bool Network::Client::ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet)
 {
 	std::cout << "Packet received with size: " << packet->m_buffer.size() << '\n';
 	return true;

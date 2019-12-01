@@ -11,7 +11,7 @@ namespace Network
 		bool Frame();
 		void ChatFrame();
 	protected:
-		virtual bool ProcessPacket(std::shared_ptr<Packet> packet);
+		virtual bool ProcessPacket(TCPConnection& connected, std::shared_ptr<Packet> packet);
 		virtual void OnConnect();
 		virtual void OnConnectFail();
 		virtual void OnDisconnect(std::string reason);

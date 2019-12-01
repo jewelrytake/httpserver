@@ -133,6 +133,7 @@ bool SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd)
 		//- we'll have to try again next time we are able to write normal data without blocking
 		return false;
 	}
+	return true;
 }
 
 bool SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd)
@@ -156,5 +157,5 @@ bool SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd)
 	{
 		return false;
 	}
+	return true;
 }
-
