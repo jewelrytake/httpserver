@@ -1,6 +1,12 @@
 #include <Client.hpp>
 #include <iostream>
 #include <NetworkUtility.hpp>
+#include <string>
+#include <thread>
+
+
+//TODO: remove flag variable and make a function returns bool
+
 
 Network::Client::Client() = default;
 
@@ -58,7 +64,7 @@ bool Network::Client::Frame()
 			CloseConnection(std::move(status));
 			return false;
 		}
-		
+
 		if (m_use_fd.revents & POLLRDNORM) //If normal data can be read without blocking
 		{
 			int bytesReceived = ReceiveData(m_connection, m_use_fd);
@@ -73,16 +79,16 @@ bool Network::Client::Frame()
 				m_connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
 				if (m_connection.pm_incoming.m_currentTask == Network::PacketTask::ProcessPacketSize)
 				{
-					uint8_t flag = 0;
-					ProcessPacketSize(m_connection, flag);
-					if(flag == 1)
+					if (!ProcessPacketSize(m_connection))
 					{
 						CloseConnection("Packet size too large.");
 						return false;
 					}
 				}
-				else //Processing packet contents
+				if (m_connection.pm_incoming.m_currentTask == Network::PacketTask::ProcessPacketContents)  //Processing packet contents
 				{
+					bytesReceived = ReceiveData(m_connection, m_use_fd);
+					m_connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
 					if (m_connection.pm_incoming.currentPacketExtractionOffset == m_connection.pm_incoming.currentPacketSize)
 					{
 						ProcessPacketContent(m_connection);
@@ -90,7 +96,6 @@ bool Network::Client::Frame()
 				}
 			}
 		}
-
 		if (m_use_fd.revents & POLLWRNORM) //If normal data can be written without blocking
 		{
 			PacketManager& pm = m_connection.pm_outgoing;
@@ -99,16 +104,12 @@ bool Network::Client::Frame()
 			{
 				if (pm.m_currentTask == PacketTask::ProcessPacketSize) //Sending packet size
 				{
-					flag = 0;
-					SendSizeData(pm, m_use_fd, flag);
-					if (flag == 1)
+					if (!SendSizeData(pm, m_use_fd))
 						break;
 				}
 				else //Sending packet contents
 				{
-					flag = 0;
-					SendContentData(pm, m_use_fd, flag);
-					if (flag == 1)
+					if (!SendContentData(pm, m_use_fd))
 						break;
 				}
 			}
@@ -129,6 +130,15 @@ bool Network::Client::Frame()
 		m_connection.pm_incoming.Pop();
 	}
 	return true;
+}
+
+void Network::Client::ChatFrame()
+{
+	std::string text;
+	std::shared_ptr<Packet> message = std::make_shared<Packet>(PacketType::PT_ChatMessage);
+	std::getline(std::cin, text);
+	*message << text;
+	m_connection.pm_outgoing.Append(message);
 }
 
 bool Network::Client::ProcessPacket(std::shared_ptr<Packet> packet)

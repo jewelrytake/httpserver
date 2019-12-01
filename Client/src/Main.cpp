@@ -1,4 +1,5 @@
 #include <TCPClient.hpp>
+#include <thread>
 
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
 {
@@ -20,11 +21,14 @@ int main()
 	{
 		SetConsoleCtrlHandler(CtrlHandler, TRUE);
 		Network::TCPClient client;
+		//std::thread chat{ &Network::TCPClient::ChatFrame, client };
+		//chat.join();
 		if (client.Connect(Network::IPAddress("127.0.0.1", 6112)))
 		{
 			while (client.IsConnected())
 			{
 				client.Frame();
+				client.ChatFrame();
 			}
 		}
 	}

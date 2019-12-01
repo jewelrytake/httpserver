@@ -104,11 +104,9 @@ namespace Network
 						connection.pm_incoming.currentPacketExtractionOffset += bytesReceived;
 						if (connection.pm_incoming.m_currentTask == Network::PacketTask::ProcessPacketSize)
 						{
-							uint8_t flag = 0;
-							ProcessPacketSize(connection, flag);
-							if (flag == 1)
+							if (!ProcessPacketSize(connection))
 							{
-								CloseConnection(connectionIndex, "Packet size too large."); 
+								CloseConnection(connectionIndex, "Packet size too large.");
 								continue;
 							}
 						}
@@ -126,22 +124,19 @@ namespace Network
 #pragma region Send data to client
 				if (m_use_fd[i].revents & POLLWRNORM)
 				{
-					uint8_t flag;
+					
 					PacketManager& pm = connection.pm_outgoing;
 					while (pm.HasPendingPackets())
 					{
 						if (pm.m_currentTask == PacketTask::ProcessPacketSize)
 						{
-							flag = 0;
-							SendSizeData(pm, m_use_fd[i], flag);
-							if (flag == 1)
+							
+							if (!SendSizeData(pm, m_use_fd[i]))
 								break;
 						}
 						else
 						{
-							flag = 0;
-							SendContentData(pm, m_use_fd[i], flag);
-							if (flag == 1)
+							if (!SendContentData(pm, m_use_fd[i]))
 								break;
 						}
 					}

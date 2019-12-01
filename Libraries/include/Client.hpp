@@ -9,6 +9,7 @@ namespace Network
 		bool Connect(IPAddress ip);
 		bool IsConnected();
 		bool Frame();
+		void ChatFrame();
 	protected:
 		virtual bool ProcessPacket(std::shared_ptr<Packet> packet);
 		virtual void OnConnect();
@@ -16,7 +17,6 @@ namespace Network
 		virtual void OnDisconnect(std::string reason);
 		void CloseConnection(std::string&& reason);
 		TCPConnection m_connection;
-
 	private:
 		bool m_isConnected = false;
 		WSAPOLLFD m_master_fd{};

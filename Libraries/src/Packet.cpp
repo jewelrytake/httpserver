@@ -3,7 +3,8 @@
 #include <iostream>
 #include <NetworkUtility.hpp>
 
-struct PacketHash {
+struct PacketHash
+{
 	std::size_t operator()(Network::Packet p) const
 	{
 		std::hash<int> hashVal1;
@@ -26,8 +27,6 @@ Network::PacketType Network::Packet::GetPacketType()
 {
 	PacketType* packet_ptr = reinterpret_cast<PacketType*>(&m_buffer[0]);
 	return static_cast<PacketType>(ntohs((uint16_t)*packet_ptr));
-	PacketType* packetTypePtr = reinterpret_cast<PacketType*>(&m_buffer[0]);
-	return static_cast<PacketType>(ntohs((uint16_t)*packetTypePtr));
 }
 
 void Network::Packet::AssignPacketType(PacketType packetType)
@@ -60,7 +59,7 @@ void Network::Packet::AppendInteger(const uint32_t* data, uint32_t size)
 	}
 	for (uint32_t i = 0; i < size; i++)
 	{
-		unsigned char tmp[4] = { 0 };
+		char tmp[4] = { 0 };
 		DecomposeInt_32(tmp, data[i]);
 		m_buffer.insert(m_buffer.end(), &tmp[0], &tmp[4]);
 	}
@@ -121,7 +120,7 @@ Network::Packet& Network::Packet::operator>>(std::string& data)
 }
 
 //write to Packet 
-Network::Packet& Network::Packet::operator<<(const std::vector<char>& data)
+Network::Packet& Network::Packet::operator<<(const std::vector< char > & data)
 {
 	//using Packet& Packet::operator<<(uint32_t data)
 	*this << (uint32_t)data.size();
@@ -129,7 +128,7 @@ Network::Packet& Network::Packet::operator<<(const std::vector<char>& data)
 	return *this;
 }
 
-Network::Packet& Network::Packet::operator>>(std::vector< char >& data)
+Network::Packet& Network::Packet::operator>>(std::vector< char > & data)
 {
 	//clear old data
 	data.clear();
@@ -165,7 +164,7 @@ Network::Packet& Network::Packet::operator >> (std::vector < uint32_t >& data)
 
 	for (uint32_t i = 0; i < size; i++)
 	{
-		unsigned char tmp[4] = 
+		char tmp[4] = 
 		{
 			m_buffer[m_extractionOffset],
 			m_buffer[m_extractionOffset + (uint32_t)1],

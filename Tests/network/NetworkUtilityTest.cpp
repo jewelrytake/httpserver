@@ -7,7 +7,7 @@ using namespace Network;
 
 TEST(NetworkUtilityTest, Int_32Conversion)
 {
-	unsigned char buf[4] = { 0 };
+	char buf[4] = { 0 };
 	uint32_t val = 31242;
 	DecomposeInt_32(buf, val);
 	uint32_t ret_val = ComposeInt_32(buf);

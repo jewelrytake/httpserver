@@ -1,7 +1,7 @@
 #include <NetworkUtility.hpp>
 #include <iostream>
 
-void DecomposeInt_32(unsigned char* buf, int32_t val)
+void DecomposeInt_32(char* buf, int32_t val)
 {
 	uint32_t uval = val;
 	buf[0] = uval;
@@ -10,7 +10,7 @@ void DecomposeInt_32(unsigned char* buf, int32_t val)
 	buf[3] = uval >> 24;
 }
 
-int32_t ComposeInt_32(unsigned char* buf)
+int32_t ComposeInt_32(char* buf)
 {
 	// This prevents buf[i] from being promoted to a signed int.
 	uint32_t u0 = buf[0], u1 = buf[1], u2 = buf[2], u3 = buf[3];
@@ -29,18 +29,19 @@ void ProcessPacketContent(Network::TCPConnection& connection)
 	connection.pm_incoming.m_currentTask = Network::PacketTask::ProcessPacketSize;
 }
 
-void ProcessPacketSize(Network::TCPConnection& connection, uint8_t& conditionFlag)
+bool ProcessPacketSize(Network::TCPConnection& connection)
 {
 	if (connection.pm_incoming.currentPacketExtractionOffset == sizeof(uint16_t))
 	{
 		connection.pm_incoming.currentPacketSize = ntohs(connection.pm_incoming.currentPacketSize);
 		if (connection.pm_incoming.currentPacketSize > Network::g_maxPacketSize)
 		{
-			conditionFlag = 1;
+			return false;
 		}
 		connection.pm_incoming.currentPacketExtractionOffset = 0;
 		connection.pm_incoming.m_currentTask = Network::PacketTask::ProcessPacketContents;
 	}
+	return true;
 }
 #pragma endregion End code specific to read data
 
@@ -107,7 +108,7 @@ int ReceiveData(Network::TCPConnection& connection, WSAPOLLFD& use_fd)
 	return bytesReceived;
 }
 
-void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& flag)
+bool SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd)
 {
 	pm.currentPacketSize = (uint16_t)pm.GetCurrentPacket()->m_buffer.size();
 	uint16_t netPacketSize = htons(pm.currentPacketSize);
@@ -130,11 +131,11 @@ void SendSizeData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& flag)
 	{
 		//If full packet size was not sent, break out of the loop for sending outgoing packets for this connection
 		//- we'll have to try again next time we are able to write normal data without blocking
-		flag = 1;
+		return false;
 	}
 }
 
-void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& flag)
+bool SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd)
 {
 	char* bufferPtr = &pm.GetCurrentPacket()->m_buffer[0];
 	int bytesSent = send(use_fd.fd,
@@ -153,7 +154,7 @@ void SendContentData(Network::PacketManager& pm, WSAPOLLFD& use_fd, uint8_t& fla
 	}
 	else
 	{
-		flag = 1;
+		return false;
 	}
 }
 
