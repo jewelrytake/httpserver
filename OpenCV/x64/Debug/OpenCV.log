@@ -1,0 +1,3 @@
+﻿  Main.cpp
+C:\smooth\projects\WebSockets\OpenCV\src\Main.cpp(73,56): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  OpenCV.vcxproj -> C:\smooth\projects\WebSockets\x64\Debug\OpenCV.exe

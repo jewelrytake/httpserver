@@ -93,16 +93,16 @@ int ReceiveData(Network::TCPConnection& connection, WSAPOLLFD& use_fd)
 	{
 		bytesReceived = recv(
 			use_fd.fd,
-			(char*)(int)(&connection.pm_incoming.currentPacketSize + connection.pm_incoming.currentPacketExtractionOffset),
-			sizeof(uint16_t) - (int)connection.pm_incoming.currentPacketExtractionOffset,
+			(char*)(&connection.pm_incoming.currentPacketSize + connection.pm_incoming.currentPacketExtractionOffset),
+			sizeof(uint16_t) - connection.pm_incoming.currentPacketExtractionOffset,
 			0);
 	}
 	else //Process Packet Contents
 	{
 		bytesReceived = recv(
 			use_fd.fd,
-			(char*)(int)(&connection.m_buffer + connection.pm_incoming.currentPacketExtractionOffset),
-			int (connection.pm_incoming.currentPacketSize - connection.pm_incoming.currentPacketExtractionOffset),
+			(char*)(&connection.m_buffer + connection.pm_incoming.currentPacketExtractionOffset),
+			connection.pm_incoming.currentPacketSize - connection.pm_incoming.currentPacketExtractionOffset,
 			0);
 	}
 	return bytesReceived;

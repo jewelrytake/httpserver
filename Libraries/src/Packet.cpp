@@ -124,7 +124,7 @@ Network::Packet& Network::Packet::operator<<(const std::vector< char > & data)
 {
 	//using Packet& Packet::operator<<(uint32_t data)
 	*this << (uint32_t)data.size();
-	Append(data.data(), data.size());
+	Append(data.data(), (uint32_t)data.size());
 	return *this;
 }
 
@@ -167,9 +167,9 @@ Network::Packet& Network::Packet::operator >> (std::vector < uint32_t >& data)
 		char tmp[4] = 
 		{
 			m_buffer[m_extractionOffset],
-			m_buffer[m_extractionOffset + (uint32_t)1],
-			m_buffer[m_extractionOffset + (uint32_t)2],
-			m_buffer[m_extractionOffset + (uint32_t)3]
+			m_buffer[m_extractionOffset + 1],
+			m_buffer[m_extractionOffset + 2],
+			m_buffer[m_extractionOffset + 3]
 		};
 		data[i] = ComposeInt_32(tmp);
 		m_extractionOffset += sizeof(uint32_t);
