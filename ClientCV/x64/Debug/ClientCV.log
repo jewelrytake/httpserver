@@ -1,7 +1,0 @@
-﻿  MainClient.cpp
-C:\smooth\projects\WebSockets\ClientCV\src\MainClient.cpp(13,1): warning C4005: 'FRAME_WIDTH': macro redefinition
-C:\smooth\projects\WebSockets\ClientCV\src\config.h(4): message : see previous definition of 'FRAME_WIDTH'
-C:\smooth\projects\WebSockets\ClientCV\src\MainClient.cpp(14,1): warning C4005: 'FRAME_HEIGHT': macro redefinition
-C:\smooth\projects\WebSockets\ClientCV\src\config.h(3): message : see previous definition of 'FRAME_HEIGHT'
-C:\smooth\projects\WebSockets\ClientCV\src\MainClient.cpp(32,7): warning C4101: 'RecvBuf': unreferenced local variable
-  ClientCV.vcxproj -> C:\smooth\projects\WebSockets\x64\Debug\ClientCV.exe
